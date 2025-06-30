@@ -114,6 +114,16 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     console.log("setValue", next);
     const prev = value;
     runListeners(paintCallbacks.current, prev, next);
+
+    const a = next.a;
+    const c = next.c;
+    const h = next.h;
+    const l = next.l;
+    let hash = `#${l},${c},${h},${a}`
+    if (location.hash !== hash) {
+      history.pushState(null, '', `#${l},${c},${h},${a}`)
+    }
+
     setStateValue(next);
   }, [value, paintCallbacks]);
 

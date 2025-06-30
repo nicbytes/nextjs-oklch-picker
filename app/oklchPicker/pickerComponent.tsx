@@ -74,16 +74,16 @@ export default function OklchPickerComponent() {
       <div>
         <Card>
           <div className="chart is-l" aria-hidden="true">
-            <Chart componentType="l" />
+            <Chart componentType="h" />
             <Range componentType="l" />
           </div>
         </Card>
         <div className="chart is-c" aria-hidden="true">
-          <Chart componentType="c" />
+          <Chart componentType="l" />
           <Range componentType="c" />
         </div>
         <div className="chart is-h" aria-hidden="true">
-          <Chart componentType="h" />
+          <Chart componentType="c" />
           <Range componentType="h" />
         </div>
       </div>
