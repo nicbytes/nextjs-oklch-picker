@@ -5,6 +5,7 @@ import { LchValue, useOklchContext } from "./context/OklchContext";
 import { initCanvasSize } from "./canvas";
 import { useRenderContext } from "./context/renderContext";
 import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
+import Range from "./components/Range";
 
 function Card({children}: {children: React.ReactNode}) {
   return (
@@ -65,6 +66,7 @@ function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
   return <canvas ref={chartRef} className="chart_canvas" width="340" height="150"></canvas>;
 }
 
+
 export default function OklchPickerComponent() {
   return (
     <>
@@ -72,13 +74,16 @@ export default function OklchPickerComponent() {
         <Card>
           <div className="chart is-l" aria-hidden="true">
             <Chart componentType="l" />
+            <Range componentType="l" />
           </div>
         </Card>
         <div className="chart is-c" aria-hidden="true">
           <Chart componentType="c" />
+          <Range componentType="c" />
         </div>
         <div className="chart is-h" aria-hidden="true">
           <Chart componentType="h" />
+          <Range componentType="h" />
         </div>
       </div>
     </>

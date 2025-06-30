@@ -79,7 +79,7 @@ export function build(l: number, c: number, h: number, alpha = 1): AnyLch {
 export let toTarget: (color: Color) => AnyLch
 toTarget = oklch
 
-// export let canvasFormat: (c: AnyLch) => string = formatRgbFast
+export let canvasFormat: (c: AnyLch) => string = formatRgbFast
 
 export function fastFormat(color: Color): string {
   if (color.mode === COLOR_FN) {
