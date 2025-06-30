@@ -35,7 +35,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
     return {
       a: {
         max: ALPHA_MAX,
-        step: ALPHA_STEP,
+        step: ALPHA_STEP / 100,
         defaultValue: 100,
       },
       l: {
@@ -45,12 +45,12 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
       },
       c: {
         max: C_MAX,
-        step: C_STEP,
+        step: C_STEP / 100,
         defaultValue: 0.1,
       },
       h: {
         max: H_MAX,
-        step: H_STEP,
+        step: H_STEP / 100,
         defaultValue: 286,
       }
     }[componentType];
