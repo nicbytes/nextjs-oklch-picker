@@ -1,8 +1,20 @@
+"use client";
+
 import { useRef, useEffect, useCallback } from "react";
 import { LchValue, useOklchContext } from "./context/OklchContext";
 import { initCanvasSize } from "./canvas";
 import { useRenderContext } from "./context/renderContext";
 import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
+
+function Card({children}: {children: React.ReactNode}) {
+  return (
+    <>
+      <div className="bg-gray-700 rounded-3xl flex flex-col justify-center items-center">
+        {children}
+      </div>
+    </>
+  );
+}
 
 export default function OklchPickerComponent() {
 
@@ -17,9 +29,14 @@ export default function OklchPickerComponent() {
   const attachedPaintCallbacksRef = useRef<boolean>(false);
 
   useEffect(() => {
+    console.log("OklchPickerComponent useEffect: before check");
     if (!chartLRef.current || !chartCRef.current || !chartHRef.current) {
+      console.log("OklchPickerComponent useEffect: not ready");
       return;
     }
+
+    console.log("OklchPickerComponent useEffect: Initialising charts");
+    console.log("OklchPickerComponent useEffect: canvases", chartLRef.current, chartCRef.current, chartHRef.current);
 
     initCanvasSize(chartLRef.current);
     initCanvasSize(chartCRef.current);
@@ -62,21 +79,25 @@ export default function OklchPickerComponent() {
       })
     }
 
-    // initEvents(chartLRef.current);
-    // initEvents(chartCRef.current);
-    // initEvents(chartHRef.current);
-  }, [!chartLRef.current, !chartCRef.current, !chartHRef.current]);
+    initEvents(chartLRef.current);
+    initEvents(chartCRef.current);
+    initEvents(chartHRef.current);
+  }, []);
 
   return (
     <>
-      <div className="chart is-l" aria-hidden="true">
-        <canvas ref={chartLRef} className="chart_canvas" width="340" height="150"></canvas>
-      </div>
-      <div className="chart is-c" aria-hidden="true">
-        <canvas ref={chartCRef} className="chart_canvas" width="340" height="150"></canvas>
-      </div>
-      <div className="chart is-h" aria-hidden="true">
-        <canvas ref={chartHRef} className="chart_canvas" width="340" height="150"></canvas>
+      <div>
+        <Card>
+          <div className="chart is-l" aria-hidden="true">
+            <canvas ref={chartLRef} className="cL chart_canvas" width="340" height="150"></canvas>
+          </div>
+        </Card>
+        <div className="chart is-c" aria-hidden="true">
+          <canvas ref={chartCRef} className="cC chart_canvas" width="340" height="150"></canvas>
+        </div>
+        <div className="chart is-h" aria-hidden="true">
+          <canvas ref={chartHRef} className="cH chart_canvas" width="340" height="150"></canvas>
+        </div>
       </div>
     </>
   );
