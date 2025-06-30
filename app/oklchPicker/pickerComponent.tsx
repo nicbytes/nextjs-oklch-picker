@@ -16,49 +16,29 @@ function Card({children}: {children: React.ReactNode}) {
   );
 }
 
-export default function OklchPickerComponent() {
-
+function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
   const { setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks} = useOklchContext();
-  const OklchContext = useOklchContext();
   const {startWorkForComponent} = useRenderContext();
 
-  const chartLRef = useRef<HTMLCanvasElement>(null);
-  const chartCRef = useRef<HTMLCanvasElement>(null);
-  const chartHRef = useRef<HTMLCanvasElement>(null);
-
-  const attachedPaintCallbacksRef = useRef<boolean>(false);
+  const chartRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     console.log("OklchPickerComponent useEffect: before check");
-    if (!chartLRef.current || !chartCRef.current || !chartHRef.current) {
+    if (!chartRef.current) {
       console.log("OklchPickerComponent useEffect: not ready");
       return;
     }
 
     console.log("OklchPickerComponent useEffect: Initialising charts");
-    console.log("OklchPickerComponent useEffect: canvases", chartLRef.current, chartCRef.current, chartHRef.current);
+    console.log("OklchPickerComponent useEffect: canvases", chartRef.current);
 
-    initCanvasSize(chartLRef.current);
-    initCanvasSize(chartCRef.current);
-    initCanvasSize(chartHRef.current);
-    if (attachedPaintCallbacksRef.current) {
-      return;
-    }
+    initCanvasSize(chartRef.current);
     addPaintCallbacks({
-      c(c, chartsToChange) {
+      [componentType]: (c: number, chartsToChange: number) => {
         if (!showCharts) return
-        startWorkForComponent(chartCRef.current!, 'c', c, chartsToChange, showP3, showRec2020, supportValue)
+        startWorkForComponent(chartRef.current!, componentType, c, chartsToChange, showP3, showRec2020, supportValue)
       },
-      h(h, chartsToChange) {
-        if (!showCharts) return
-        startWorkForComponent(chartHRef.current!, 'h', h, chartsToChange, showP3, showRec2020, supportValue)
-      },
-      l(l, chartsToChange) {
-        if (!showCharts) return
-        startWorkForComponent(chartLRef.current!, 'l', l, chartsToChange, showP3, showRec2020, supportValue)
-      }
     });
-    attachedPaintCallbacksRef.current = true;
 
     // TODO: Remove event listeners on unmount.
     function initEvents(chart: HTMLCanvasElement): void {
@@ -79,24 +59,26 @@ export default function OklchPickerComponent() {
       })
     }
 
-    initEvents(chartLRef.current);
-    initEvents(chartCRef.current);
-    initEvents(chartHRef.current);
+    initEvents(chartRef.current);
   }, []);
 
+  return <canvas ref={chartRef} className="chart_canvas" width="340" height="150"></canvas>;
+}
+
+export default function OklchPickerComponent() {
   return (
     <>
       <div>
         <Card>
           <div className="chart is-l" aria-hidden="true">
-            <canvas ref={chartLRef} className="cL chart_canvas" width="340" height="150"></canvas>
+            <Chart componentType="l" />
           </div>
         </Card>
         <div className="chart is-c" aria-hidden="true">
-          <canvas ref={chartCRef} className="cC chart_canvas" width="340" height="150"></canvas>
+          <Chart componentType="c" />
         </div>
         <div className="chart is-h" aria-hidden="true">
-          <canvas ref={chartHRef} className="cH chart_canvas" width="340" height="150"></canvas>
+          <Chart componentType="h" />
         </div>
       </div>
     </>
