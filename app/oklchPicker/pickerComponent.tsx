@@ -23,6 +23,7 @@ function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
 
   const chartRef = useRef<HTMLCanvasElement>(null);
 
+
   useEffect(() => {
     console.log("OklchPickerComponent useEffect: before check");
     if (!chartRef.current) {
@@ -45,13 +46,13 @@ function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
     function initEvents(chart: HTMLCanvasElement): void {
       function onSelect(e: MouseEvent): void {
         e.preventDefault()
-        setComponentsFromSpace(chart, e.clientX, e.clientY, showRec2020, setComponents)
+        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents)
       }
     
       function onMouseUp(e: MouseEvent): void {
         document.removeEventListener('mousemove', onSelect)
         document.removeEventListener('mouseup', onMouseUp)
-        setComponentsFromSpace(chart, e.clientX, e.clientY, showRec2020, setComponents)
+        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents)
       }
     
       chart.addEventListener('mousedown', () => {
@@ -102,23 +103,23 @@ function setComponentsFromSpace(
   space: HTMLCanvasElement,
   mouseX: number,
   mouseY: number,
-  showRec2020: boolean,
+  componentType: 'l' | 'c' | 'h',
   setComponents: (parts: Partial<LchValue>) => void
 ): void {
   let rect = space.getBoundingClientRect()
   let x = clamp(mouseX - rect.left, 0, rect.width)
   let y = clamp(rect.height - (mouseY - rect.top), 0, rect.height)
-  if (space.parentElement!.classList.contains('is-l')) {
+  if (componentType === 'l') {
     setComponents({
       c: (getMaxC() * y) / rect.height,
       h: (H_MAX * x) / rect.width
     })
-  } else if (space.parentElement!.classList.contains('is-c')) {
+  } else if (componentType === 'c') {
     setComponents({
       h: (H_MAX * x) / rect.width,
       l: (L_MAX * y) / rect.height
     })
-  } else if (space.parentElement!.classList.contains('is-h')) {
+  } else if (componentType === 'h') {
     setComponents({
       c: (getMaxC() * y) / rect.height,
       l: (L_MAX * x) / rect.width
