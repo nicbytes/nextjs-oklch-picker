@@ -8,7 +8,7 @@ import {
 } from '@/lib/colors'
 import { generateGetSeparator, paintPixel } from '@/lib/paint'
 import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX_COLOR } from '@/lib/config'
-import { SupportValue } from './context/OklchContext'
+import { SupportValue } from './type'
 
 
 function separate(

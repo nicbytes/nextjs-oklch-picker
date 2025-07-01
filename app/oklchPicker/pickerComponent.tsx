@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { LchValue, useOklchContext } from "./context/OklchContext";
+import { useOklchContext } from "./context/OklchContext";
 import { initCanvasSize } from "./canvas";
 import { useRenderContext } from "./context/renderContext";
 import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
 import Range from "./components/Range";
-import { getVisibleValue, Space } from "@/lib/colors";
+import { getVisibleValue } from "@/lib/colors";
+import { LchValue } from "./type";
 
 function round2(value: number): number {
   return parseFloat(value.toFixed(2))

@@ -1,43 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   type AnyLch,
-  build,
+  colorToValue,
   forceP3,
   getSpace,
-  lch,
   oklch,
   parseAnything,
   Space,
-  toRgb
+  toRgb,
+  valueToColor
 } from '@/lib/colors'
 import { formatHex8 } from 'culori/fn'
 import { C_RANDOM, COLOR_FN, L_MAX_COLOR } from "@/lib/config";
-
-export interface LchValue {
-  a: number;
-  c: number;
-  h: number;
-  l: number;
-}
-
-export type OutputFormats =
-  | 'figmaP3'
-  | 'hex'
-  | 'hex/rgba'
-  | 'hsl'
-  | 'lab'
-  | 'lch'
-  | 'lrgb'
-  | 'numbers'
-  | 'oklab'
-  | 'p3'
-  | 'rgb'
-  ;
-
-export interface SupportValue {
-  p3: boolean
-  rec2020: boolean
-}
+import { LchValue, OutputFormats, SupportValue } from "../type";
 
 export interface OklchContextType {
   /**
@@ -329,19 +304,6 @@ function preciseRoundValue<V extends Partial<LchValue>>(
 function isRgbInput(colorCodeInput: string): boolean {
   let parsed = parseAnything(colorCodeInput)
   return parsed?.mode === 'rgb'
-}
-
-export function valueToColor(value: LchValue): AnyLch {
-  return build(value.l * L_MAX_COLOR, value.c, value.h, value.a / 100)
-}
-
-export function colorToValue(color: AnyLch): LchValue {
-  return {
-    a: (color.alpha ?? 1) * 100,
-    c: color.c,
-    h: color.h ?? 0,
-    l: color.l / L_MAX_COLOR,
-  }
 }
 
 type PrevCurrentValue = { [key in keyof LchValue]?: number } | LchValue;

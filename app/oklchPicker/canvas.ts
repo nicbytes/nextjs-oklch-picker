@@ -1,4 +1,4 @@
-import { SupportValue } from "./context/OklchContext"
+import { SupportValue } from "./type"
 
 export function getCleanCtx(
   canvas: HTMLCanvasElement,

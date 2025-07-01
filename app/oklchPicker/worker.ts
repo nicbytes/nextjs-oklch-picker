@@ -1,6 +1,6 @@
 import type { Rgb } from '@/lib/colors'
 import { paintCH, paintCL, paintLH } from './paint'
-import { SupportValue } from './context/OklchContext';
+import { SupportValue } from './type';
 
 export type PaintData = {
   borderP3: Rgb

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef } from "react
 import { PaintData, PaintedData } from "../worker";
 import { rgb, parse } from "@/lib/colors";
 import { getCleanCtx } from "../canvas";
-import { SupportValue } from "./OklchContext";
+import { SupportValue } from "../type";
 
 
 interface StartWork<TaskData extends object, ResultData extends object> {

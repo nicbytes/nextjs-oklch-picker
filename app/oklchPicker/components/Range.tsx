@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { LchValue, SupportValue, useOklchContext, valueToColor } from "../context/OklchContext";
+import { useOklchContext } from "../context/OklchContext";
 import { useRenderContext } from "../context/renderContext";
 import { ALPHA_MAX, ALPHA_STEP, C_MAX, C_MAX_REC2020, C_STEP, H_MAX, H_STEP, L_MAX_COLOR, L_STEP } from "@/lib/config";
 import styles from './Range.module.css';
 import { getCleanCtx, initCanvasSize } from "../canvas";
-import { AnyLch, build, canvasFormat, fastFormat, generateGetSpace, Space, toRgb } from "@/lib/colors";
+import { AnyLch, build, canvasFormat, fastFormat, generateGetSpace, Space, toRgb, valueToColor } from "@/lib/colors";
+import { LchValue, SupportValue } from "../type";
 
 export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c' | 'h' }) {
 

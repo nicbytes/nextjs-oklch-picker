@@ -24,8 +24,8 @@ import {
   useMode
 } from 'culori/fn'
 
-import { L_MAX, COLOR_FN } from './config';
-import { LchValue, valueToColor } from '@/app/oklchPicker/context/OklchContext';
+import { L_MAX, COLOR_FN, L_MAX_COLOR } from './config';
+import { LchValue } from '@/app/oklchPicker/type';
 
 export type { Rgb } from 'culori/fn'
 
@@ -437,4 +437,17 @@ export function getVisibleValue(value: LchValue, p3: boolean, rec2020: boolean):
       }
     }
   }
+}
+
+export function colorToValue(color: AnyLch): LchValue {
+  return {
+    a: (color.alpha ?? 1) * 100,
+    c: color.c,
+    h: color.h ?? 0,
+    l: color.l / L_MAX_COLOR,
+  }
+}
+
+export function valueToColor(value: LchValue): AnyLch {
+  return build(value.l * L_MAX_COLOR, value.c, value.h, value.a / 100)
 }
