@@ -24,7 +24,6 @@ export type PaintedData = {
 }
 
 addEventListener("message", (e: MessageEvent<PaintData>) => {
-  console.log("event.data", e.data);
   let start = Date.now()
 
   let image: ImageData

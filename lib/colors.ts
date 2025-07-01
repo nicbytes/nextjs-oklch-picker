@@ -1,30 +1,31 @@
 import {
-    type Color,
-    formatCss,
-    formatRgb as formatRgbFast,
-    inGamut,
-    type Lch,
-    type Lrgb,
-    modeHsl,
-    modeLab,
-    modeLch,
-    modeLrgb,
-    modeOklab,
-    modeOklch,
-    modeP3,
-    modeRec2020,
-    modeRgb,
-    modeXyz65,
-    type Oklch,
-    parse as originParse,
-    type P3,
-    type Rec2020,
-    type Rgb,
-    toGamut,
-    useMode
-  } from 'culori/fn'
+  type Color,
+  formatCss,
+  formatRgb as formatRgbFast,
+  inGamut,
+  type Lch,
+  type Lrgb,
+  modeHsl,
+  modeLab,
+  modeLch,
+  modeLrgb,
+  modeOklab,
+  modeOklch,
+  modeP3,
+  modeRec2020,
+  modeRgb,
+  modeXyz65,
+  type Oklch,
+  parse as originParse,
+  type P3,
+  type Rec2020,
+  type Rgb,
+  toGamut,
+  useMode
+} from 'culori/fn'
 
 import { L_MAX, COLOR_FN } from './config';
+import { LchValue, valueToColor } from '@/app/oklchPicker/context/OklchContext';
 
 export type { Rgb } from 'culori/fn'
 
@@ -389,4 +390,51 @@ export function generateGetPixel(
     }
   }
 }
-  
+
+
+
+export interface VisibleValue {
+  color: Color
+  fallback: string
+  real: false | string
+  space: 'out' | 'p3' | 'rec2020' | 'srgb'
+}
+
+export function getVisibleValue(value: LchValue, p3: boolean, rec2020: boolean): VisibleValue {
+  let color = valueToColor(value)
+  let space = getSpace(color)
+  if (space === Space.sRGB) {
+    let rgbCss = formatRgb(rgb(color))
+    return {
+      color,
+      fallback: rgbCss,
+      real: rgbCss,
+      space: 'srgb'
+    }
+  } else {
+    let rgbColor = toRgb(color)
+    let fallback = formatRgb(rgbColor)
+    if (space === Space.P3) {
+      return {
+        color: p3 ? color : rgbColor,
+        fallback,
+        real: p3 ? fastFormat(color) : false,
+        space: 'p3'
+      }
+    } else if (space === Space.Rec2020) {
+      return {
+        color: rec2020 ? color : rgbColor,
+        fallback,
+        real: rec2020 ? fastFormat(color) : false,
+        space: 'rec2020'
+      }
+    } else {
+      return {
+        color: rgbColor,
+        fallback,
+        real: false,
+        space: 'out'
+      }
+    }
+  }
+}

@@ -50,7 +50,6 @@ function paint(
   borderRec2020: Rgb,
   getColor: GetColor
 ): ImageData {
-  console.log("painting", getColor);
   let getPixel = generateGetPixel(
     getColor,
     showP3,

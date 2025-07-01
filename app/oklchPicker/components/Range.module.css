@@ -2,7 +2,7 @@ body {
   --range-color: var(--surface-1);
 }
 
-.range {
+/* .range {
   position: relative;
   box-sizing: border-box;
   height: 40px;
@@ -31,19 +31,8 @@ body {
   height: calc(100% + 2px);
   border-radius: var(--radius);
 }
+ */
 
-.rangeInput {
-  position: absolute;
-  top: -1px;
-  left: -13px;
-  z-index: 2;
-  width: calc(100% + 26px);
-  height: calc(100% + 2px);
-  appearance: none;
-  cursor: pointer;
-  background: transparent;
-  border-radius: var(--radius);
-}
 
 .rangeInput::-moz-range-thumb {
   box-sizing: border-box;

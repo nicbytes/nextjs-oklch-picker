@@ -44,7 +44,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
         defaultValue: 70,
       },
       c: {
-        max: C_MAX,
+        max: showRec2020 ? C_MAX_REC2020 : C_MAX,
         step: C_STEP / 100,
         defaultValue: 0.1,
       },
@@ -56,100 +56,111 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
     }[componentType];
   }, [componentType]);
 
-  const callback = useCallback(() => {
-    if (!canvasRef.current) return ["ch", (v: LchValue) => {}];
-    if (!inputRef.current) return ["ch", (v: LchValue) => {}];
-    let painters = {
-      ch(value: LchValue) {
-        let color = valueToColor(value);
-        let c = color.c
-        let h = color.h ?? 0
-        let [width, height] = initCanvasSize(canvasRef.current!)
-        let factor = L_MAX_COLOR / width
-        setList(
-          paint(
-            canvasRef.current!,
-            'l',
-            width,
-            height,
-            parseFloat(String(step)),
-            x => {
-              return build(x * factor, c, h)
-            },
-            supportValue,
-            showP3,
-            showRec2020,
-          )
-        )
-      },
-      lc(value: LchValue) {
-        let { c, l } = valueToColor(value)
-        let [width, height] = initCanvasSize(canvasRef.current!)
-        let factor = H_MAX / width
-        setList(
-          paint(
-            canvasRef.current!,
-            'h',
-            width,
-            height,
-            parseFloat(String(step)),
-            x => {
-              return build(l, c, x * factor)
-            },
-            supportValue,
-            showP3,
-            showRec2020,
-          )
-        )
-      },
-      lh(value: LchValue) {
-        let color = valueToColor(value)
-        let l = color.l
-        let h = color.h ?? 0
-        let [width, height] = initCanvasSize(canvasRef.current!)
-        let factor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / width
-        setList(
-          paint(
-            canvasRef.current!,
-            'c',
-            width,
-            height,
-            parseFloat(String(step)),
-            x => {
-              return build(l, x * factor, h)
-            },
-            supportValue,
-            showP3,
-            showRec2020,
-          )
-        )
-      }
-    }
-    const type = componentType as 'l' | 'c' | 'h';
-    return {
-      l: ["ch", painters.ch],
-      c: ["lh", painters.lh],
-      h: ["lc", painters.lc],
-    }[type];
-  }, [canvasRef.current, supportValue, showP3, showRec2020, step, componentType]);
+
 
 
 
   useEffect(() => {
+    const callback = () => {
+      if (!canvasRef.current) return ["ch", (v: LchValue) => {}];
+      if (!inputRef.current) return ["ch", (v: LchValue) => {}];
+      let painters = {
+        ch(value: LchValue) {
+          let color = valueToColor(value);
+          let c = color.c
+          let h = color.h ?? 0
+          let [width, height] = initCanvasSize(canvasRef.current!)
+          let factor = L_MAX_COLOR / width
+          setList(
+            paint(
+              canvasRef.current!,
+              'l',
+              width,
+              height,
+              parseFloat(String(step)),
+              x => {
+                return build(x * factor, c, h)
+              },
+              supportValue,
+              showP3,
+              showRec2020,
+            )
+          )
+        },
+        lc(value: LchValue) {
+          let { c, l } = valueToColor(value)
+          let [width, height] = initCanvasSize(canvasRef.current!)
+          let factor = H_MAX / width
+          setList(
+            paint(
+              canvasRef.current!,
+              'h',
+              width,
+              height,
+              parseFloat(String(step)),
+              x => {
+                return build(l, c, x * factor)
+              },
+              supportValue,
+              showP3,
+              showRec2020,
+            )
+          )
+        },
+        lh(value: LchValue) {
+          let color = valueToColor(value)
+          let l = color.l
+          let h = color.h ?? 0
+          let [width, height] = initCanvasSize(canvasRef.current!)
+          let factor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / width
+          setList(
+            paint(
+              canvasRef.current!,
+              'c',
+              width,
+              height,
+              parseFloat(String(step)),
+              x => {
+                return build(l, x * factor, h)
+              },
+              supportValue,
+              showP3,
+              showRec2020,
+            )
+          )
+        }
+      }
+      const type = componentType as 'l' | 'c' | 'h';
+      return {
+        l: ["ch", painters.ch],
+        c: ["lh", painters.lh],
+        h: ["lc", painters.lc],
+      }[type];
+    };
 
     if (componentType !== 'a') {
       const [type, painter] = callback!();
-      addPaintCallbacks({
+      addPaintCallbacks(`range-for-${componentType}`, {
         [type]: painter,
       });
     }
 
+  }, [showRec2020, showP3, showRec2020, componentType]);
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (componentType === 'l') {
+      setComponents({ l: parseFloat(e.target.value) });
+    } else if (componentType === 'c') {
+      setComponents({ c: parseFloat(e.target.value) });
+    } else if (componentType === 'h') {
+      setComponents({ h: parseFloat(e.target.value) });
+    }
   }, []);
 
   return (
-    <div ref={divRef} className={styles.range}>
-      <canvas ref={canvasRef} className={styles.rangeSpace} width="680" height="80"></canvas>
-      <input ref={inputRef} className={styles.rangeInput} type="range" min="0" max={max} step={step} aria-hidden="true" value={inputValue} tabIndex={-1} list={`range_${componentType}_values`} />
+    <div ref={divRef} className="relative box-border h-10 border border-zinc-500/40 border-dashed block rounded-xl ml-8 mr-8">
+      <canvas ref={canvasRef} className="absolute top-[-1px] left-[-1px] w-[calc(100%+2px)] h-[calc(100%+2px)] rounded-xl overflow-clip" width="340" height="40" style={{ overflowClipMargin: 'content-box', width: 340, aspectRatio: "auto 680/80" }}></canvas>
+      <input ref={inputRef} className={`absolute top-[-1px] left-[-13px] z-2 w-[calc(100%+26px)] h-[calc(100%+2px)] appearance-none cursor-pointer bg-transparent rounded-xl ${styles.rangeInput}`} type="range" min="0" max={max} step={step} aria-hidden="true" value={inputValue} tabIndex={-1} list={`range_${componentType}_values`} onChange={onChange} />
       <datalist ref={dataListRef} id={`range_${componentType}_values`}>
         <option value="0.1188"></option>
         <option value="0.1589"></option>

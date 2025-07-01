@@ -81,7 +81,7 @@ export interface OklchContextType {
   setShowRec2020: (showRec2020: boolean) => void;
   supportValue: SupportValue;
 
-  addPaintCallbacks: (callbacks: LchCallbacks) => void;
+  addPaintCallbacks: (name: string, callbacks: LchCallbacks) => void;
 }
 
 export const OklchContext = createContext<OklchContextType | undefined>(undefined);
@@ -100,6 +100,8 @@ export function useOklchContext(): OklchContextType {
 }
 
 export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ children, defaultColorCode }) => {
+
+  // TODO: Align the initial value with the default color.
   let [value, setStateValue] = useState<LchValue>({ a: 100, c: C_RANDOM, h: Math.round(360 * Math.random()), l: 0.7 });
   let [colorCodeInput, setStateColorCodeInput] = useState(defaultColorCode);
   let [outputFormat, setOutputFormat] = useState<OutputFormats>('lch');
@@ -107,35 +109,55 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   let [showP3, setShowP3] = useState(true);
   let [showRec2020, setShowRec2020] = useState(false);
   let [supportValue, setSupportValue] = useState<SupportValue>({ p3: false, rec2020: false });
-  const paintCallbacks = useRef<LchCallbacks[]>([]);
+  const paintCallbacks = useRef<Map<string, LchCallbacks>>(new Map());
 
 
-  const setValue = useCallback((next: LchValue) => {
-    console.log("setValue", next);
-    const prev = value;
-    runListeners(paintCallbacks.current, prev, next);
+  const setValue = useCallback((nextOrUpdater: LchValue | ((prev: LchValue) => LchValue)) => {
+    setStateValue(prev => {
+      // 1. Resolve the next state
+      const next =
+        typeof nextOrUpdater === 'function'
+          ? (nextOrUpdater as (v: LchValue) => LchValue)(prev)
+          : nextOrUpdater;
 
-    const a = next.a;
-    const c = next.c;
-    const h = next.h;
-    const l = next.l;
-    let hash = `#${l},${c},${h},${a}`
-    if (location.hash !== hash) {
-      history.pushState(null, '', `#${l},${c},${h},${a}`)
-    }
+      // Store the rounded value:
+      next.a = round4(next.a);
+      next.c = round6(next.c);
+      next.h = round4(next.h);
+      next.l = round6(next.l);
 
-    setStateValue(next);
-  }, [value, paintCallbacks]);
+      if (next === prev) {
+        console.log("setValue: skipping running of listeners");
+        return next;
+      }
 
-  const setComponents = (parts: Partial<LchValue>) => {
-    let rounded = aggressiveRoundValue(parts);
-    setValue({
-      a: value.a,
-      c: typeof rounded.c === 'undefined' ? value.c : rounded.c,
-      h: typeof rounded.h === 'undefined' ? value.h : rounded.h,
-      l: typeof rounded.l === 'undefined' ? value.l : rounded.l
+      console.log("setValue", next);
+      runListeners(paintCallbacks.current, prev, next);
+      const a = next.a;
+      const c = next.c;
+      const h = next.h;
+      const l = next.l;
+      let hash = `#${l},${c},${h},${a}`
+      if (location.hash !== hash) {
+        history.pushState(null, '', `#${l},${c},${h},${a}`)
+      }
+
+      return next;
     });
-  };
+  }, [paintCallbacks]);
+
+  const setComponents = useCallback(
+    (parts: Partial<LchValue>) =>
+      setValue(prev => ({
+        ...prev,
+        ...preciseRoundValue(parts)
+      })),
+    []
+  );
+
+  useEffect(() => {
+    setColorCodeInput(defaultColorCode);
+  }, []);
 
 
   const setColorCodeInput = useCallback((code: string) => {
@@ -160,7 +182,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
       return;
     }
     let originSpace = getSpace(parsed)
-    
+
     function isPreciseEnough(value: LchValue): boolean {
       let color = valueToColor(value)
       if (originSpace !== getSpace(color)) {
@@ -214,7 +236,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     }
   }, []);
 
-  const addPaintCallbacks = (callbacks: LchCallbacks) => paintCallbacks.current.push(callbacks);
+  const addPaintCallbacks = (name: string, callbacks: LchCallbacks) => paintCallbacks.current.set(name, callbacks);
 
   useEffect(() => {
     console.log("paintCallbacks", paintCallbacks);
@@ -343,7 +365,7 @@ interface LchCallbacks {
   lh?: LchCallback;
 }
 
-function runListeners(list: LchCallbacks[], prev: PrevCurrentValue, next: LchValue): void {
+function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, next: LchValue): void {
   let chartsToChange = 0
   let lChanged = prev.l !== next.l
   let cChanged = prev.c !== next.c
@@ -361,38 +383,38 @@ function runListeners(list: LchCallbacks[], prev: PrevCurrentValue, next: LchVal
     chartsToChange = 1
   }
 
-  console.log("runListeners", list, prev, next, chartsToChange);
+  console.log("runListeners", map, prev, next, chartsToChange);
 
-  for (let i of list) {
-    console.log("runListeners", i);
-    if (i.l && lChanged) {
+  for (let [_name, callbacks] of map.entries()) {
+    console.log("runListeners", callbacks);
+    if (callbacks.l && lChanged) {
       console.log("l", next.l, chartsToChange);
-      i.l(next.l, chartsToChange)
+      callbacks.l(next.l, chartsToChange)
     }
-    if (i.c && cChanged) {
+    if (callbacks.c && cChanged) {
       console.log("c", next.c, chartsToChange);
-      i.c(next.c, chartsToChange)
+      callbacks.c(next.c, chartsToChange)
     }
-    if (i.h && hChanged) {
+    if (callbacks.h && hChanged) {
       console.log("h", next.h, chartsToChange);
-      i.h(next.h, chartsToChange)
+      callbacks.h(next.h, chartsToChange)
     }
-    if (i.alpha && prev.a !== next.a) {
+    if (callbacks.alpha && prev.a !== next.a) {
       console.log("alpha", next.a, chartsToChange);
-      i.alpha(next.a, 0)
+      callbacks.alpha(next.a, 0)
     }
 
-    if (i.lc && (lChanged || cChanged)) {
-      i.lc(next)
+    if (callbacks.lc && (lChanged || cChanged)) {
+      callbacks.lc(next)
     }
-    if (i.ch && (cChanged || hChanged)) {
-      i.ch(next)
+    if (callbacks.ch && (cChanged || hChanged)) {
+      callbacks.ch(next)
     }
-    if (i.lh && (lChanged || hChanged)) {
-      i.lh(next)
+    if (callbacks.lh && (lChanged || hChanged)) {
+      callbacks.lh(next)
     }
-    if (i.lch && (lChanged || cChanged || hChanged)) {
-      i.lch(next)
+    if (callbacks.lch && (lChanged || cChanged || hChanged)) {
+      callbacks.lch(next)
     }
   }
 }
