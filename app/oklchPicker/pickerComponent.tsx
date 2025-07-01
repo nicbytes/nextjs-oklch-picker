@@ -8,10 +8,27 @@ import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
 import Range from "./components/Range";
 import { getVisibleValue } from "@/lib/colors";
 import { LchValue } from "./type";
+import { Martian_Mono } from "next/font/google";
+import {Field} from "./components/Field";
+
+function cn(...args: string[]): string {
+  return args.join(' ')
+}
+
+const font = Martian_Mono({
+  subsets: ['latin'],
+  weight: ['200', '400', '700'],
+});
+
 
 function round2(value: number): number {
   return parseFloat(value.toFixed(2))
 }
+
+function round4(value: number): number {
+  return parseFloat(value.toFixed(4))
+}
+
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
@@ -109,7 +126,7 @@ function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
   const yLineAfterClassName = "after:right-0 after:left-0 after:bottom-[var(--chart-line-position)] after:h-[1px] after:absolute after:z-[2] after:bg-gray-900 after:mix-blend-difference after:opacity-70";
 
   return (
-    <div className="box-border relative border-t border-b border-zinc-500/40 border-dashed inline-block m-8" ref={containingDivRef}>
+    <div className={cn("box-border relative border-t border-b border-zinc-500/40 border-dashed inline-block m-8", font.className)} ref={containingDivRef}>
       {/* X axis */}
       <div ref={xAxisDivRef} className={`absolute left-0 top-0 w-full h-[calc(100%+1px)] ${xLineAfterClassName}`} style={{ pointerEvents: 'none' }}>
         <div className={`absolute top-[100%] w-[15px] h-[15px] text-[12px] text-center uppercase select-none opacity-50`} style={{ left: `calc(var(${xPositionVariable}) - 7px)` }}>{xComponent}</div>
@@ -131,8 +148,7 @@ function Sample() {
   const { value, showP3, showRec2020, supportValue } = useOklchContext();
 
   const visible = getVisibleValue(value, showP3, showRec2020);
-  const { color, real, fallback, space } = visible;
-
+  const { real, fallback, space } = visible;
 
   let unavailableMessage = null;
   if (real) {
@@ -145,32 +161,32 @@ function Sample() {
     unavailableMessage = "Unavailable on any device.";
   }
 
-  console.log("visible", visible);
-
-
-
-
   return (
-    <div className="flex">
+    <div className={cn("flex", font.className)}>
       <div className="relative w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded text-center flex flex-col justify-center items-center" style={{ backgroundColor: real ? real : "" }}>
         <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs">{unavailableMessage}</span>
         {((space === "p3" && supportValue.p3) || (space === "rec2020" && supportValue.rec2020)) &&
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600 p-1 rounded-lg pr-2 pl-2 mb-1">{space.toLocaleUpperCase()}</div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600/60 p-1 rounded-lg pr-2 pl-2 mb-1">{space.toLocaleUpperCase()}</div>
         }
       </div>
       {space !== "srgb" &&
         <div className="relative w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded" style={{ backgroundColor: fallback }}>
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600 p-1 rounded-lg pr-2 pl-2 mb-1">Fallback</div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600/60 p-1 rounded-lg pr-2 pl-2 mb-1">Fallback</div>
         </div>
       }
     </div>
   );
 }
 
+function ComponentValue() {
+
+}
+
 
 
 
 export default function OklchPickerComponent() {
+  const { value, setComponents } = useOklchContext();
   return (
     <>
       <div>
@@ -179,18 +195,70 @@ export default function OklchPickerComponent() {
         </div>
         <Card>
           <div className="chart is-l" aria-hidden="true">
+            <Field
+              label="Lightness"
+              value={String(round4(value.l))}
+              pattern={/^\d*\.?\d*$/}
+              spin
+              onSpin={(action, slow) => {
+                const step = slow ? 0.01 : 0.1;
+                const current = Number(value.l) || 0;
+                const next =
+                  action === 'increase'
+                    ? Math.min(current + step, L_MAX)
+                    : Math.max(current - step, 0);
+                setComponents({ l: next });
+              }}
+              onChange={(val) => setComponents({ l: parseFloat(val) })}
+            />
             <Chart componentType="h" />
             <Range componentType="l" />
           </div>
         </Card>
-        <div className="chart is-c" aria-hidden="true">
-          <Chart componentType="l" />
-          <Range componentType="c" />
-        </div>
-        <div className="chart is-h" aria-hidden="true">
-          <Chart componentType="c" />
-          <Range componentType="h" />
-        </div>
+        <Card>
+          <div className="chart is-c" aria-hidden="true">
+            <Field
+              label="Chroma"
+              value={String(round4(value.c))}
+              pattern={/^\d*\.?\d*$/}
+              spin
+              onSpin={(action, slow) => {
+                const step = slow ? 0.01 : 0.1;
+                const current = Number(value.c) || 0;
+                const next =
+                  action === 'increase'
+                    ? Math.min(current + step, getMaxC())
+                    : Math.max(current - step, 0);
+                setComponents({ c: next });
+              }}
+              onChange={(val) => setComponents({ c: parseFloat(val) })}
+            />
+            <Chart componentType="l" />
+            <Range componentType="c" />
+          </div>
+        </Card>
+        <Card>
+          <div className="chart is-h" aria-hidden="true">
+            <Field
+              label="Hue"
+              value={String(round2(value.h))}
+              pattern={/^\d*\.?\d*$/}
+              spin
+              onSpin={(action, slow) => {
+                const step = slow ? 1 : 10;
+                const current = Number(value.h) || 0;
+                const next =
+                  action === 'increase'
+                    ? Math.min(current + step, H_MAX)
+                    : Math.max(current - step, 0);
+                setComponents({ h: next });
+              }}
+              onChange={(val) => setComponents({ h: parseFloat(val) })}
+            />
+            <Chart componentType="c" />
+            <Range componentType="h" />
+          </div>
+        </Card>
       </div>
     </>
   );
