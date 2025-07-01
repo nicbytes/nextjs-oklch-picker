@@ -151,12 +151,19 @@ function Sample() {
 
 
   return (
-    <>
-      <div className="w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded" style={{ backgroundColor: real ? real : "" }}>{unavailableMessage}</div>
+    <div className="flex">
+      <div className="relative w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded text-center flex flex-col justify-center items-center" style={{ backgroundColor: real ? real : "" }}>
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xs">{unavailableMessage}</span>
+        {((space === "p3" && supportValue.p3) || (space === "rec2020" && supportValue.rec2020)) &&
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600 p-1 rounded-lg pr-2 pl-2 mb-1">{space.toLocaleUpperCase()}</div>
+        }
+      </div>
       {space !== "srgb" &&
-        <div className="w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded" style={{ backgroundColor: fallback }}></div>
+        <div className="relative w-full h-24 outline -outline-offset-1 outline-black/10 dark:outline-white/10 rounded" style={{ backgroundColor: fallback }}>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-xs text-white font-light bg-zinc-600 p-1 rounded-lg pr-2 pl-2 mb-1">Fallback</div>
+        </div>
       }
-    </>
+    </div>
   );
 }
 
@@ -167,9 +174,9 @@ export default function OklchPickerComponent() {
   return (
     <>
       <div>
-        {/* <div> */}
-        {/*   <Sample /> */}
-        {/* </div> */}
+        <div>
+          <Sample />
+        </div>
         <Card>
           <div className="chart is-l" aria-hidden="true">
             <Chart componentType="h" />
