@@ -95,29 +95,35 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
           ? (nextOrUpdater as (v: LchValue) => LchValue)(prev)
           : nextOrUpdater;
 
-      // Store the rounded value:
-      next.a = round4(next.a);
-      next.c = round6(next.c);
-      next.h = round4(next.h);
-      next.l = round6(next.l);
+      // "Deep bounce" by checking if the change is significant enough
+      const prevRounded = aggressiveRoundValue(prev);
+      const nextRounded = aggressiveRoundValue(next);
 
-      if (next === prev) {
-        console.log("setValue: skipping running of listeners");
-        return next;
+      if (
+        prevRounded.l === nextRounded.l &&
+        prevRounded.c === nextRounded.c &&
+        prevRounded.h === nextRounded.h &&
+        prevRounded.a === nextRounded.a
+      ) {
+        return prev; // Not a significant enough change, skip update.
       }
 
-      console.log("setValue", next);
-      runListeners(paintCallbacks.current, prev, next);
-      const a = next.a;
-      const c = next.c;
-      const h = next.h;
-      const l = next.l;
+      // Store the rounded value:
+      const finalNext = { ...next };
+      finalNext.a = round4(finalNext.a);
+      finalNext.c = round6(finalNext.c);
+      finalNext.h = round4(finalNext.h);
+      finalNext.l = round6(finalNext.l);
+
+      console.log("setValue", finalNext);
+      runListeners(paintCallbacks.current, prev, finalNext);
+      const { l, c, h, a } = finalNext;
       let hash = `#${l},${c},${h},${a}`
       if (location.hash !== hash) {
         history.pushState(null, '', `#${l},${c},${h},${a}`)
       }
 
-      return next;
+      return finalNext;
     });
   }, [paintCallbacks]);
 

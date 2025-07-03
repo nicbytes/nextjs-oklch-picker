@@ -25,6 +25,7 @@
   --danger: oklch(0.59 0.23 7);
   --border-p3: oklch(1 0 0 / 50%);
   --border-rec2020: oklch(1 0 0 / 75%);
+  --surface-box: oklch(0.94 0.005 300);
 }
 
 @theme inline {
@@ -36,7 +37,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #1e1e1e;
     --foreground: #ededed;
 
     --surface-0: oklch(0 0 0);
@@ -45,11 +46,13 @@
     --surface-2-shadow: oklch(0 0 0 / 40%);
     --surface-3d: oklch(0.29 0.01 300);
     --text-primary: oklch(1 0 0);
+    --text-secondary: oklch(0.8 0 0);
     --text-note: oklch(0.45 0 0);
     --chess: oklch(0.38 0.01 297);
     --ui-border: oklch(0.7 0 0 / 50%);
     --border-p3: oklch(0 0 0 / 30%);
     --border-rec2020: oklch(0 0 0 / 50%);
+    --surface-box: oklch(0.29 0.01 300);
   }
 }
 

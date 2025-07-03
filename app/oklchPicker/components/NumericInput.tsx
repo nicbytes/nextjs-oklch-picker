@@ -6,13 +6,17 @@ import React, {
   KeyboardEvent,
   MouseEvent
 } from 'react';
+import { Martian_Mono } from "next/font/google";
+
+const font = Martian_Mono({
+  subsets: ['latin'],
+  weight: ['200', '400', '700']
+});
 
 type SpinAction = 'increase' | 'decrease';
 
-export interface FieldProps {
+export interface NumericInputProps {
 
-  /** The main label for the field, e.g., "Lightness". */
-  label: string;
   /** Controlled value. */
   value: string;
   /** Called on text change. Receives the raw string. */
@@ -25,31 +29,8 @@ export interface FieldProps {
   onSpin?(action: SpinAction, slow: boolean): void;
 }
 
-// SVG icon components for the spin buttons
-const UpArrow = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className="w-4 h-4"
-  >
-    <path d="M12 8l-4 4h8l-4-4z" />
-  </svg>
-);
 
-const DownArrow = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className="w-4 h-4"
-  >
-    <path d="M12 16l4-4H8l4 4z" />
-  </svg>
-);
-
-export const Field: React.FC<FieldProps> = ({
-  label,
+export const NumericInput: React.FC<NumericInputProps> = ({
   value,
   onChange,
   pattern,
@@ -128,49 +109,43 @@ export const Field: React.FC<FieldProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between w-full max-w-xs">
-      <span className="text-2xl font-bold text-white font-sans select-none">
-        {label}
-      </span>
-      <div className="flex items-center bg-[#4a4652] rounded-xl p-1 ">
-        <div className="flex items-center">
-          <input
-            ref={inputRef}
-            className={`
-              w-24 bg-transparent text-white text-xl font-mono text-center
+    <div className="flex w-32 items-center content-stretch bg-[#3D3D3D] rounded-lg px-2 py-1.5 text-white/90">
+      <input
+        ref={inputRef}
+        className={`
+              w-full bg-transparent text-white text-lg font-mono text-right
               focus:outline-none
               ${invalid ? 'text-red-400' : ''}
+              ${font.className}
             `}
-            aria-invalid={invalid || undefined}
-            role={spin ? 'spinbutton' : undefined}
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            onKeyDown={onKeyDown}
-            pattern={pattern?.source}
-            aria-valuenow={spin ? value : undefined}
-          />
-          {spin && (
-            <div className="flex flex-col items-center justify-center -space-y-1">
-              <button
-                type="button"
-                aria-label="Increase"
-                className="text-white/70 hover:text-white transition-colors"
-                onMouseDown={makeSpinHandler('increase')}
-              >
-                <UpArrow />
-              </button>
-              <button
-                type="button"
-                aria-label="Decrease"
-                className="text-white/70 hover:text-white transition-colors"
-                onMouseDown={makeSpinHandler('decrease')}
-              >
-                <DownArrow />
-              </button>
-            </div>
-          )}
+        aria-invalid={invalid || undefined}
+        role={spin ? 'spinbutton' : undefined}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+        pattern={pattern?.source}
+        aria-valuenow={spin ? value : undefined}
+      />
+      {spin && (
+        <div className="flex flex-col self-stretch ml-2">
+          <button
+            type="button"
+            aria-label="Increase"
+            className="h-full flex items-end rounded-t px-1 text-white/70 hover:text-white transition-colors"
+            onMouseDown={makeSpinHandler('increase')}
+          >
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 1L9 5L1 5L5 1Z" fill="#9CA3AF" /></svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Decrease"
+            className="h-full flex items-start rounded-b px-1 text-white/70 hover:text-white transition-colors"
+            onMouseDown={makeSpinHandler('decrease')}
+          >
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5L1 1H9L5 5Z" fill="#9CA3AF" /></svg>
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };

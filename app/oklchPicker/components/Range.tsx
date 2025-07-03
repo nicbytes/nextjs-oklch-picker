@@ -159,7 +159,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
   }, []);
 
   return (
-    <div ref={divRef} className="relative box-border h-10 border border-zinc-500/40 border-dashed block rounded-xl ml-8 mr-8">
+    <div ref={divRef} className="relative box-border h-10 border border-zinc-500/40 border-dashed block rounded-xl w-[340px]">
       <canvas ref={canvasRef} className="absolute top-[-1px] left-[-1px] w-[calc(100%+2px)] h-[calc(100%+2px)] rounded-xl overflow-clip" width="340" height="40" style={{ overflowClipMargin: 'content-box', width: 340, aspectRatio: "auto 680/80" }}></canvas>
       <input ref={inputRef} className={`absolute top-[-1px] left-[-13px] z-2 w-[calc(100%+26px)] h-[calc(100%+2px)] appearance-none cursor-pointer bg-transparent rounded-xl ${styles.rangeInput}`} type="range" min="0" max={max} step={step} aria-hidden="true" value={inputValue} tabIndex={-1} list={`range_${componentType}_values`} onChange={onChange} />
       <datalist ref={dataListRef} id={`range_${componentType}_values`}>
