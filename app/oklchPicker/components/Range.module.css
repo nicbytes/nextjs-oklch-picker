@@ -1,4 +1,4 @@
-body {
+.rangeColorSetter {
   --range-color: var(--surface-1);
 }
 

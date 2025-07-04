@@ -1,22 +1,15 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { useOklchContext } from "./context/OklchContext";
-import { initCanvasSize } from "./canvas";
-import { useRenderContext } from "./context/renderContext";
-import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
+import { H_MAX, L_MAX } from "@/lib/config";
 import Range from "./components/Range";
-import { getVisibleValue } from "@/lib/colors";
-import { LchValue } from "./type";
 import { Martian_Mono } from "next/font/google";
 import { NumericInput } from "./components/NumericInput";
 import Card from "./components/Card";
 import Chart, { getMaxC } from "./components/Chart";
 import ColorSample from "./components/ColorSample";
-
-
-
-
+import rangeStyles from "./components/Range.module.css";
+import { useEffect, useRef } from "react";
 
 
 const font = Martian_Mono({
@@ -34,24 +27,21 @@ function round4(value: number): number {
 }
 
 
-
-
-
-
-
-
-function ComponentValue() {
-
-}
-
-
-
-
 export default function OklchPickerComponent() {
-  const { value, setComponents } = useOklchContext();
+  const { value, setComponents, addPaintCallbacks } = useOklchContext();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    addPaintCallbacks('range-color-setter', {
+      lch: (value) => {
+        containerRef.current!.style.setProperty('--range-color', `oklch(${value.l} ${value.c} ${value.h})`);
+      }
+    });
+  }, [addPaintCallbacks]);
+    
   return (
     <>
-      <div className="items-center flex flex-col">
+      <div ref={containerRef} className={`items-center flex flex-col ${rangeStyles.rangeColorSetter}`}>
         <div className="w-full max-w-[340px]">
           <ColorSample />
         </div>
