@@ -9,8 +9,9 @@ import Card from "./components/Card";
 import Chart, { getMaxC } from "./components/Chart";
 import ColorSample from "./components/ColorSample";
 import rangeStyles from "./components/Range.module.css";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import AlphaRange from "./components/AlphaRange";
+import Model from "./components/Model";
 
 
 const font = Martian_Mono({
@@ -43,11 +44,12 @@ export default function OklchPickerComponent() {
     
   return (
     <>
-      <div ref={containerRef} className={`items-center flex flex-col ${rangeStyles.rangeColorSetter}`}>
+      <div ref={containerRef} className={`items-center flex flex-col max-h-[600px] flex-wrap ${rangeStyles.rangeColorSetter}`}>
         <div className="w-full max-w-[340px]">
           <ColorSample />
         </div>
         <Card>
+        <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
             <span className={`text-xl font-mono ${font.className}`}>Lightness</span>
             <NumericInput
@@ -68,8 +70,10 @@ export default function OklchPickerComponent() {
           </div>
           <Chart componentType="h" />
           <Range componentType="l" />
+          <div className="mb-6"></div>
         </Card>
         <Card>
+        <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
             <span className={`text-xl font-mono ${font.className}`}>Chroma</span>
             <NumericInput
@@ -90,8 +94,10 @@ export default function OklchPickerComponent() {
           </div>
           <Chart componentType="l" />
           <Range componentType="c" />
+          <div className="mb-6"></div>
         </Card>
         <Card>
+          <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
             <span className={`text-xl font-mono ${font.className}`}>Hue</span>
             <NumericInput
@@ -121,9 +127,10 @@ export default function OklchPickerComponent() {
           </div>
           <Chart componentType="c" />
           <Range componentType="h" />
+          <div className="mb-6"></div>
         </Card>
         <Card>
-          <div className="mx-8 flex flex-col gap-4">
+          <div className="mx-8 flex flex-col gap-4 my-6">
             <div className="w-full max-w-[340px] flex justify-between items-center">
               <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
               <NumericInput
@@ -143,6 +150,12 @@ export default function OklchPickerComponent() {
               />
             </div>
           <AlphaRange />
+          </div>
+        </Card>
+        <Card>
+          <Model className="w-[404px] h-[344px]" />
+          <div className="absolute top-8 left-8">
+            <span className={`text-xl font-mono pointer-events-none ${font.className}`}>3D</span>
           </div>
         </Card>
       </div>
