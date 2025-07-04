@@ -3,7 +3,7 @@
 TODO
 
 - [x] Slider style
-- [ ] Alpha control
+- [x] Alpha control
 - [ ] Apply color to variable Local CSS Variable.
 - [ ] 3D graph
 - [ ] Toggle controls.
@@ -11,3 +11,4 @@ TODO
 - [ ] Run two independent sliders at the same time.
 - [ ] only tailwind no custom variables.
 - [ ] Fix init errors.
+- [ ] visual feedback when clicking numeric input buttons.

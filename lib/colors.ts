@@ -441,7 +441,7 @@ export function getVisibleValue(value: LchValue, p3: boolean, rec2020: boolean):
 
 export function colorToValue(color: AnyLch): LchValue {
   return {
-    a: (color.alpha ?? 1) * 100,
+    a: (color.alpha ?? 1),
     c: color.c,
     h: color.h ?? 0,
     l: color.l / L_MAX_COLOR,
@@ -449,5 +449,5 @@ export function colorToValue(color: AnyLch): LchValue {
 }
 
 export function valueToColor(value: LchValue): AnyLch {
-  return build(value.l * L_MAX_COLOR, value.c, value.h, value.a / 100)
+  return build(value.l * L_MAX_COLOR, value.c, value.h, value.a)
 }

@@ -10,7 +10,6 @@ import { LchValue, SupportValue } from "../type";
 export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c' | 'h' }) {
 
   const { value, setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks} = useOklchContext();
-  const {startWorkForComponent} = useRenderContext();
 
   const divRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

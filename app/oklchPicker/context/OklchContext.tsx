@@ -338,6 +338,7 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
   let lChanged = prev.l !== next.l
   let cChanged = prev.c !== next.c
   let hChanged = prev.h !== next.h
+  let aChanged = prev.a !== next.a
 
   if (lChanged && cChanged && hChanged) {
     chartsToChange = 3
@@ -367,7 +368,7 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
       console.log("h", next.h, chartsToChange);
       callbacks.h(next.h, chartsToChange)
     }
-    if (callbacks.alpha && prev.a !== next.a) {
+    if (callbacks.alpha && aChanged) {
       console.log("alpha", next.a, chartsToChange);
       callbacks.alpha(next.a, 0)
     }
@@ -381,7 +382,7 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
     if (callbacks.lh && (lChanged || hChanged)) {
       callbacks.lh(next)
     }
-    if (callbacks.lch && (lChanged || cChanged || hChanged)) {
+    if (callbacks.lch && (lChanged || cChanged || hChanged || aChanged)) {
       callbacks.lch(next)
     }
   }

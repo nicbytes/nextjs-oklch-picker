@@ -10,6 +10,7 @@ import Chart, { getMaxC } from "./components/Chart";
 import ColorSample from "./components/ColorSample";
 import rangeStyles from "./components/Range.module.css";
 import { useEffect, useRef } from "react";
+import AlphaRange from "./components/AlphaRange";
 
 
 const font = Martian_Mono({
@@ -34,7 +35,8 @@ export default function OklchPickerComponent() {
   useEffect(() => {
     addPaintCallbacks('range-color-setter', {
       lch: (value) => {
-        containerRef.current!.style.setProperty('--range-color', `oklch(${value.l} ${value.c} ${value.h})`);
+        console.log({value})
+        containerRef.current!.style.setProperty('--range-color', `oklch(${value.l} ${value.c} ${value.h} / ${value.a})`);
       }
     });
   }, [addPaintCallbacks]);
@@ -119,6 +121,29 @@ export default function OklchPickerComponent() {
           </div>
           <Chart componentType="c" />
           <Range componentType="h" />
+        </Card>
+        <Card>
+          <div className="mx-8 flex flex-col gap-4">
+            <div className="w-full max-w-[340px] flex justify-between items-center">
+              <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
+              <NumericInput
+                value={String(round2(value.a))}
+                pattern={/^[0-9]*\.?[0-9]*$/}
+                spin
+                onSpin={(action, slow) => {
+                  const step = slow ? 0.01 : 0.1;
+                  const current = Number(value.a) || 0;
+                  const next =
+                    action === 'increase'
+                      ? Math.min(current + step, 1)
+                      : Math.max(current - step, 0);
+                  setComponents({ a: next });
+                }}
+                onChange={(val) => setComponents({ a: parseFloat(val) })}
+              />
+            </div>
+          <AlphaRange />
+          </div>
         </Card>
       </div>
     </>

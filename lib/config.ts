@@ -1,5 +1,5 @@
-export const ALPHA_MAX = 100;
-export const ALPHA_STEP = 1;
+export const ALPHA_MAX = 1;
+export const ALPHA_STEP = 0.01;
   
 export const C_MAX = 0.37;
 export const C_MAX_REC2020 = 0.47;
