@@ -65,13 +65,13 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     function initEvents(chart: HTMLCanvasElement): void {
       function onSelect(e: MouseEvent): void {
         e.preventDefault()
-        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents)
+        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 
       function onMouseUp(e: MouseEvent): void {
         document.removeEventListener('mousemove', onSelect)
         document.removeEventListener('mouseup', onMouseUp)
-        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents)
+        setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 
       chart.addEventListener('mousedown', () => {
@@ -81,7 +81,7 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     }
 
     initEvents(chartRef.current);
-  }, []);
+  }, [showRec2020]);
 
   useEffect(() => {
     addPaintCallbacks(`chart-for-${componentType}`, {
@@ -144,14 +144,15 @@ function setComponentsFromSpace(
   mouseX: number,
   mouseY: number,
   componentType: 'l' | 'c' | 'h',
-  setComponents: (parts: Partial<LchValue>) => void
+  setComponents: (parts: Partial<LchValue>) => void,
+  showRec2020: boolean = false,
 ): void {
   let rect = space.getBoundingClientRect()
   let x = clamp(mouseX - rect.left, 0, rect.width)
   let y = clamp(rect.height - (mouseY - rect.top), 0, rect.height)
   if (componentType === 'l') {
     setComponents({
-      c: (getMaxC() * y) / rect.height,
+      c: (getMaxC(showRec2020) * y) / rect.height,
       h: (H_MAX * x) / rect.width
     })
   } else if (componentType === 'c') {
@@ -161,7 +162,7 @@ function setComponentsFromSpace(
     })
   } else if (componentType === 'h') {
     setComponents({
-      c: (getMaxC() * y) / rect.height,
+      c: (getMaxC(showRec2020) * y) / rect.height,
       l: (L_MAX * x) / rect.width
     })
   }

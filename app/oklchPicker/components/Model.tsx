@@ -199,7 +199,7 @@ export default function Model({ isInteractive = false, className }: ModelProps) 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { value: colorValue, showP3, showRec2020 } = useOklchContext();
 
-  const rgbMode = showP3 ? 'p3' : showRec2020 ? 'rec2020' : 'rgb';
+  const rgbMode = showRec2020 ? 'rec2020' : showP3 ? 'p3' : 'rgb';
 
   const stateRef = useRef<{
     renderer?: WebGLRenderer;

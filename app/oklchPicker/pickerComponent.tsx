@@ -12,6 +12,7 @@ import rangeStyles from "./components/Range.module.css";
 import { Suspense, useEffect, useRef } from "react";
 import AlphaRange from "./components/AlphaRange";
 import Model from "./components/Model";
+import ToggleSwitch from "./components/ToggleSwitch";
 
 
 const font = Martian_Mono({
@@ -30,7 +31,7 @@ function round4(value: number): number {
 
 
 export default function OklchPickerComponent() {
-  const { value, setComponents, addPaintCallbacks } = useOklchContext();
+  const { value, setComponents, addPaintCallbacks, showCharts, showP3, showRec2020, setShowP3, setShowRec2020, setShowCharts } = useOklchContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,9 +46,17 @@ export default function OklchPickerComponent() {
   return (
     <>
       <div ref={containerRef} className={`items-center flex flex-col max-h-[600px] flex-wrap ${rangeStyles.rangeColorSetter}`}>
-        <div className="w-full max-w-[340px]">
-          <ColorSample />
-        </div>
+        <Card>
+          <div className="mb-6"></div>
+          <div className="px-8">
+            <div className="w-[340px] flex flex-col gap-4">
+              <ColorSample />
+              <ToggleSwitch label="Show P3" checked={showP3} onChange={setShowP3} />
+              <ToggleSwitch label="Show Rec2020" checked={showRec2020} onChange={setShowRec2020} />
+            </div>
+          </div>
+          <div className="mb-6"></div>
+        </Card>
         <Card>
         <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
@@ -85,7 +94,7 @@ export default function OklchPickerComponent() {
                 const current = Number(value.c) || 0;
                 const next =
                   action === 'increase'
-                    ? Math.min(current + step, getMaxC())
+                    ? Math.min(current + step, getMaxC(showRec2020))
                     : Math.max(current - step, 0);
                 setComponents({ c: next });
               }}
@@ -162,5 +171,3 @@ export default function OklchPickerComponent() {
     </>
   );
 }
-
-

@@ -57,6 +57,8 @@ export interface OklchContextType {
   supportValue: SupportValue;
 
   addPaintCallbacks: (name: string, callbacks: LchCallbacks) => void;
+
+  paint: () => void;
 }
 
 export const OklchContext = createContext<OklchContextType | undefined>(undefined);
@@ -136,9 +138,45 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     []
   );
 
+  const paint = useCallback(() => {
+    for (let [_name, callbacks] of paintCallbacks.current.entries()) {
+      console.log("runListeners", callbacks);
+      if (callbacks.l) {
+        callbacks.l(value.l, 3)
+      }
+      if (callbacks.c) {
+        callbacks.c(value.c, 3)
+      }
+      if (callbacks.h) {
+        callbacks.h(value.h, 3)
+      }
+      if (callbacks.alpha) {
+        callbacks.alpha(value.a, 0)
+      }
+  
+      if (callbacks.lc) {
+        callbacks.lc(value)
+      }
+      if (callbacks.ch) {
+        callbacks.ch(value)
+      }
+      if (callbacks.lh) {
+        callbacks.lh(value)
+      }
+      if (callbacks.lch) {
+        callbacks.lch(value)
+      }
+    }
+  }, [paintCallbacks, value]);
+
   useEffect(() => {
     setColorCodeInput(defaultColorCode);
   }, []);
+
+  // Repaint when showP3 or showRec2020 changes
+  useEffect(() => {
+    paint();
+  }, [showP3, showRec2020]);
 
 
   const setColorCodeInput = useCallback((code: string) => {
@@ -240,6 +278,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     setShowRec2020,
 
     addPaintCallbacks,
+    paint,
   };
 
 

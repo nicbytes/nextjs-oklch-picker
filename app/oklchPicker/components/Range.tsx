@@ -54,7 +54,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
         defaultValue: 286,
       }
     }[componentType];
-  }, [componentType]);
+  }, [componentType, showRec2020]);
 
 
 
