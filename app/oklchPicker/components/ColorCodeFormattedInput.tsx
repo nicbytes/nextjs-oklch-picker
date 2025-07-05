@@ -61,12 +61,11 @@ const ColorCodeFormattedInput: React.FC<{
   value: string;
   label: string;
   onCommit: (value: string) => void;
-  isInvalid?: boolean;
-}> = ({ id, value, label, onCommit, isInvalid }) => {
+}> = ({ id, value, label, onCommit }) => {
   const [localValue, setLocalValue] = useState(value);
   const colorCodeInputRef = useRef<HTMLInputElement>(null);
   const { value: colorValue, outputFormat, setOutputFormat } = useOklchContext();
-
+  const containingDivRef = useRef<HTMLDivElement>(null);
 
   const formats = useMemo(() => {
     const color: AnyLch = valueToColor(colorValue);
@@ -121,10 +120,13 @@ const ColorCodeFormattedInput: React.FC<{
   useEffect(() => {
     if (!colorCodeInputRef.current) return;
     colorCodeInputRef.current.style.setProperty('--target-color', `oklch(${colorValue.l} ${colorValue.c} ${colorValue.h})`);
+    if (!containingDivRef.current) return;
+    containingDivRef.current.style.setProperty('--target-color-accent', `oklch(0.76 0.1 ${colorValue.h} / 42%)`);
+    containingDivRef.current.style.setProperty('--target-color-accent-hover', `oklch(0.66 0.1 ${colorValue.h})`);
   }, [colorValue]);
 
   return (
-    <div className="relative group flex gap-1">
+    <div ref={containingDivRef} className="relative group flex gap-1">
       <input
         ref={colorCodeInputRef}
         id={id}
@@ -141,8 +143,7 @@ const ColorCodeFormattedInput: React.FC<{
         }}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`w-full h-10 px-3 bg-[#3D3D3D] rounded-l-lg focus:outline-lg focus:outline-2 focus:outline-[var(--target-color)] transition-colors ${font.className} ${isInvalid ? 'text-[var(--danger)] bg-[var(--surface-ui-danger)]' : ''
-          }`}
+        className={`w-full h-10 px-3 bg-neutral-300 dark:bg-[#3D3D3D] rounded-l-lg focus:outline-lg focus:outline-2 focus:outline-[var(--target-color)] transition-colors ${font.className}`}
         autoComplete="off"
         spellCheck={false}
         autoCorrect="off"
@@ -159,8 +160,8 @@ const ColorCodeFormattedInput: React.FC<{
             <option key={f} value={f}>{f.toUpperCase()}</option>
           ))}
         </select>
-        <div className="w-12 h-10 flex items-center justify-center bg-[var(--surface-ui-accent)] text-[var(--accent)] pointer-events-none rounded-r-lg">
-          <svg className="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
+        <div className="w-12 h-10 flex items-center justify-center bg-[var(--target-color-accent)] text-[var(--target-color-accent-hover)] pointer-events-none rounded-r-lg">
+          <svg className="w-4 h-4 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
             <path fill="currentColor" fill-rule="evenodd" d="M8 11.56 3.47 7.03a.75.75 0 0 1 1.06-1.061L8 9.439l3.47-3.47a.75.75 0 1 1 1.06 1.06L8 11.56Z" clip-rule="evenodd"/>
           </svg>
         </div>

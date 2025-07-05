@@ -41,7 +41,6 @@ export const ColorCodeOklchInput: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [localValue, setLocalValue] = useState(value);
-  const [isValid, setIsValid] = useState(true);
   const [locked, setLocked] = useState(false); // replicate “locked” map
 
   /* --- keep local → external in sync --- */
@@ -73,10 +72,8 @@ export const ColorCodeOklchInput: React.FC<Props> = ({
     (v: string) => {
       // basic validity check – match original code
       if (!isHexNotation(v) && !parseAnything(v)) {
-        setIsValid(false);
         return;
       }
-      setIsValid(true);
       onCommit(v);
     },
     [onCommit]
@@ -103,12 +100,6 @@ export const ColorCodeOklchInput: React.FC<Props> = ({
     }
   }, [ctxValue]);
 
-  useEffect(() => {
-    window.formatLch = formatLch;
-    window.parseAnything = parseAnything;
-    window.isHexNotation = isHexNotation;
-  }, []);
-
   return (
     <div className="relative group">
       <input
@@ -123,8 +114,7 @@ export const ColorCodeOklchInput: React.FC<Props> = ({
         }}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        className={`w-full h-10 px-3 bg-[#3D3D3D] rounded-lg transition-colors focus:outline-2 ${font.className} ${isValid ? 'focus:outline-[var(--target-color)]' : 'text-red-500 bg-red-950 focus:outline-red-500'
-          }`}
+        className={`w-full h-10 px-3 bg-neutral-300 dark:bg-[#3D3D3D] rounded-lg transition-colors focus:outline-2 focus:outline-[var(--target-color)] ${font.className}`}
         autoComplete="off"
         spellCheck={false}
         autoCorrect="off"

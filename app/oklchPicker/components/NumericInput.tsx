@@ -109,11 +109,11 @@ export const NumericInput: React.FC<NumericInputProps> = ({
   };
 
   return (
-    <div className="flex w-32 items-center content-stretch bg-[#3D3D3D] rounded-lg px-2 py-1.5 text-white/90">
+    <div className="flex w-32 items-center content-stretch bg-neutral-100 dark:bg-[#3D3D3D] rounded-lg px-2 py-1.5 dark:text-white/90 outline dark:outline-0 outline-neutral-400/50">
       <input
         ref={inputRef}
         className={`
-              w-full bg-transparent text-white text-lg font-mono text-right
+              w-full bg-transparent dark:text-white text-lg font-mono text-right
               focus:outline-none
               ${invalid ? 'text-red-400' : ''}
               ${font.className}

@@ -26,7 +26,7 @@ export default function Sample() {
       unavailableMessage = "Unavailable on any device.";
     }
 
-    const checkerdBackgroundClassNames = "bg-[repeating-conic-gradient(theme(colors.neutral.700)_0%_25%,theme(colors.neutral.800)_0%_50%)] [background-position:50%] [background-size:8px_8px]";
+    const checkerdBackgroundClassNames = "bg-[repeating-conic-gradient(theme(colors.neutral.50)_0%_25%,theme(colors.neutral.300)_0%_50%)] dark:bg-[repeating-conic-gradient(theme(colors.neutral.700)_0%_25%,theme(colors.neutral.800)_0%_50%)] [background-position:50%] [background-size:8px_8px]";
   
     return (
       <div className="flex gap-4">

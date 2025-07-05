@@ -29,7 +29,8 @@ export default function Home() {
     <>
       <button onClick={handleWork}>Work</button>
       <RenderContextProvider>
-        <OklchPicker />
+      <OklchPicker />
+      <OklchPicker />
       </RenderContextProvider>
 
       <ColorChoice
