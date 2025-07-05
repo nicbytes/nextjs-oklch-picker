@@ -243,7 +243,7 @@ export default function Model({ isInteractive = false, className }: ModelProps) 
         }
       });
     };
-  }, [isInteractive]);
+  }, []);
 
   // Effect to handle window resizing
   useEffect(() => {
@@ -273,12 +273,18 @@ export default function Model({ isInteractive = false, className }: ModelProps) 
 
     const updateSliceFn = generateMesh(scene, rgbMode);
     stateRef.current.updateSlice = updateSliceFn;
+  }, [!stateRef.current, rgbMode])
+
+  // Update the model to the latest color
+  useEffect(() => {
+    const { scene } = stateRef.current;
+    if (!scene) return;
 
     // After regenerating, immediately update the slices to the current color
-    if (colorValue) {
-      updateSliceFn(colorValue);
+    if (typeof stateRef.current.updateSlice === 'function') {
+      stateRef.current.updateSlice(colorValue);
     }
-  }, [rgbMode, colorValue]); // Rerun if mode changes
+  }, [colorValue]); // Rerun if mode changes
 
   // Effect to update the slice lines when the color value changes
   useEffect(() => {

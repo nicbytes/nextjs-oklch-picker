@@ -162,7 +162,7 @@ const ColorCodeFormattedInput: React.FC<{
         </select>
         <div className="w-12 h-10 flex items-center justify-center bg-[var(--target-color-accent)] text-[var(--target-color-accent-hover)] pointer-events-none rounded-r-lg">
           <svg className="w-4 h-4 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
-            <path fill="currentColor" fill-rule="evenodd" d="M8 11.56 3.47 7.03a.75.75 0 0 1 1.06-1.061L8 9.439l3.47-3.47a.75.75 0 1 1 1.06 1.06L8 11.56Z" clip-rule="evenodd"/>
+            <path fill="currentColor" fillRule="evenodd" d="M8 11.56 3.47 7.03a.75.75 0 0 1 1.06-1.061L8 9.439l3.47-3.47a.75.75 0 1 1 1.06 1.06L8 11.56Z" clipRule="evenodd"/>
           </svg>
         </div>
       </div>

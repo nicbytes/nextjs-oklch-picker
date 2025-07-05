@@ -1,9 +1,13 @@
 import { OklchContextProvider } from "./context/OklchContext";
 import OklchPickerComponent from "./pickerComponent";
 
-export default function OklchPicker() {
+export interface OklchPickerProps {
+  defaultColorCode?: string;
+}
+
+export default function OklchPicker({ defaultColorCode }: OklchPickerProps) {
   return (
-    <OklchContextProvider defaultColorCode="#000">
+    <OklchContextProvider defaultColorCode={defaultColorCode ?? "#000"}>
       <OklchPickerComponent />
     </OklchContextProvider>
   );

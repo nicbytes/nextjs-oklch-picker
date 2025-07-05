@@ -65,12 +65,14 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     function initEvents(chart: HTMLCanvasElement): void {
       function onSelect(e: MouseEvent): void {
         e.preventDefault()
+        console.log("onSelect", e.clientX, e.clientY);
         setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 
       function onMouseUp(e: MouseEvent): void {
         document.removeEventListener('mousemove', onSelect)
         document.removeEventListener('mouseup', onMouseUp)
+        console.log("onMouseUp", e.clientX, e.clientY);
         setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 

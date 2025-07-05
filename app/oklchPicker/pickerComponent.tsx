@@ -31,11 +31,6 @@ function round3(value: number): number {
   return parseFloat(value.toFixed(3))
 }
 
-
-function round4(value: number): number {
-  return parseFloat(value.toFixed(4))
-}
-
 export default function OklchPickerComponent() {
   const { value, setComponents, addPaintCallbacks, colorCodeInput, setColorCodeInput, showCharts, showP3, showRec2020, setShowP3, setShowRec2020, setShowCharts } = useOklchContext();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,7 +38,6 @@ export default function OklchPickerComponent() {
   useEffect(() => {
     addPaintCallbacks('range-color-setter', {
       lch: (value) => {
-        console.log({ value })
         containerRef.current!.style.setProperty('--range-color', `oklch(${value.l} ${value.c} ${value.h} / ${value.a})`);
       }
     });

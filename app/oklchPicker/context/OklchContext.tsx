@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   type AnyLch,
   colorToValue,
@@ -78,8 +78,16 @@ export function useOklchContext(): OklchContextType {
 
 export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ children, defaultColorCode }) => {
 
+  const processedDefaultValue = useMemo(() => {
+    const colorValue = codeToLchValue(defaultColorCode);
+    if (!colorValue) {
+      throw new Error("Must only use valid color values as default value.");
+    }
+    return colorValue;
+  }, [defaultColorCode]);
+
   // TODO: Align the initial value with the default color.
-  let [value, setStateValue] = useState<LchValue>({ a: 100, c: C_RANDOM, h: Math.round(360 * Math.random()), l: 0.7 });
+  let [value, setStateValue] = useState<LchValue>(processedDefaultValue);
   let [colorCodeInput, setStateColorCodeInput] = useState(defaultColorCode);
   let [outputFormat, setOutputFormat] = useState<OutputFormats>('lch');
   let [showCharts, setShowCharts] = useState(true);
@@ -87,62 +95,65 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   let [showRec2020, setShowRec2020] = useState(false);
   let [supportValue, setSupportValue] = useState<SupportValue>({ p3: false, rec2020: false });
   const paintCallbacks = useRef<Map<string, LchCallbacks>>(new Map());
+  const lastValue = useRef<LchValue>(value);
 
 
   const setValue = useCallback((nextOrUpdater: LchValue | ((prev: LchValue) => LchValue)) => {
-    setStateValue(prev => {
-      // 1. Resolve the next state
-      const next =
-        typeof nextOrUpdater === 'function'
-          ? (nextOrUpdater as (v: LchValue) => LchValue)(prev)
-          : nextOrUpdater;
+    console.log("(useCallback) setValue", nextOrUpdater);
+    const prev = lastValue.current;
+    // 1. Resolve the next state
+    const next =
+      typeof nextOrUpdater === 'function'
+        ? (nextOrUpdater as (v: LchValue) => LchValue)(prev)
+        : nextOrUpdater;
 
-      // "Deep bounce" by checking if the change is significant enough
-      const prevRounded = aggressiveRoundValue(prev);
-      const nextRounded = aggressiveRoundValue(next);
+    // "Deep bounce" by checking if the change is significant enough
+    const prevRounded = aggressiveRoundValue(prev);
+    const nextRounded = aggressiveRoundValue(next);
 
-      if (
-        prevRounded.l === nextRounded.l &&
-        prevRounded.c === nextRounded.c &&
-        prevRounded.h === nextRounded.h &&
-        prevRounded.a === nextRounded.a
-      ) {
-        return prev; // Not a significant enough change, skip update.
-      }
+    if (
+      prevRounded.l === nextRounded.l &&
+      prevRounded.c === nextRounded.c &&
+      prevRounded.h === nextRounded.h &&
+      prevRounded.a === nextRounded.a
+    ) {
+      return; // Not a significant enough change, skip update.
+    }
 
-      // Store the rounded value:
-      const finalNext = { ...next };
-      finalNext.a = round4(finalNext.a);
-      finalNext.c = round6(finalNext.c);
-      finalNext.h = round4(finalNext.h);
-      finalNext.l = round6(finalNext.l);
+    // Store the rounded value:
+    const finalNext = { ...next };
+    finalNext.a = round4(finalNext.a);
+    finalNext.c = round6(finalNext.c);
+    finalNext.h = round4(finalNext.h);
+    finalNext.l = round6(finalNext.l);
 
-      console.log("setValue", finalNext);
+    console.log("setValue", finalNext);
+    if (finalNext.l !== prev.l || finalNext.c !== prev.c || finalNext.h !== prev.h || finalNext.a !== prev.a) {
+
       runListeners(paintCallbacks.current, prev, finalNext);
-      const { l, c, h, a } = finalNext;
-      let hash = `#${l},${c},${h},${a}`
-      if (location.hash !== hash) {
-        history.pushState(null, '', `#${l},${c},${h},${a}`)
-      }
+      lastValue.current = finalNext;
 
-      return finalNext;
-    });
+    }
+    setStateValue(finalNext);
   }, [paintCallbacks]);
 
   // Set a single component.
   const setComponents = useCallback(
-    (parts: Partial<LchValue>) =>
+    (parts: Partial<LchValue>) => {
+
+      console.log("setComponents", parts);
       setValue(prev => ({
         ...prev,
         ...preciseRoundValue(parts)
-      })),
+      }));
+    },
     []
   );
 
   // Force run all listeners.
   const paint = useCallback(() => {
     for (let [_name, callbacks] of paintCallbacks.current.entries()) {
-      console.log("runListeners", callbacks);
+      console.log("(paint) runListeners", callbacks);
       if (callbacks.l) {
         callbacks.l(value.l, 3)
       }
@@ -155,7 +166,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
       if (callbacks.alpha) {
         callbacks.alpha(value.a, 0)
       }
-  
+
       if (callbacks.lc) {
         callbacks.lc(value)
       }
@@ -181,61 +192,16 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   }, [showP3, showRec2020]);
 
 
-  const setColorCodeInput = useCallback((code: string) => {
-    let parsed = parseAnything(code);
-    if (!parsed) {
-      return;
-    }
-    if (outputFormat === 'figmaP3' && isRgbInput(colorCodeInput)) {
-      parsed = forceP3(parsed)
-    }
-    if (parsed.mode === COLOR_FN) {
-      setValue(colorToValue(parsed as AnyLch));
-      return;
-    }
-    if (
-      parsed.mode === 'rgb' &&
-      parsed.r === 1 &&
-      parsed.g === 1 &&
-      parsed.b === 1
-    ) {
-      setValue({ a: (parsed.alpha ?? 1) * 100, c: 0, h: 0, l: 1 })
-      return;
-    }
-    let originSpace = getSpace(parsed)
-
-    function isPreciseEnough(value: LchValue): boolean {
-      let color = valueToColor(value)
-      if (originSpace !== getSpace(color)) {
-        return false
-      } else if (formatHex8(color) !== formatHex8(parsed)) {
-        return false
-      } else {
-        return true
+  const setColorCodeInput = useCallback(
+    (code: string) => {
+      const maybeValue = codeToLchValue(code);
+      if (maybeValue) {
+        setValue(maybeValue);
+        setStateColorCodeInput(code);
       }
-    }
-
-    let accurate = oklch(parsed)
-    if (originSpace === Space.sRGB && getSpace(accurate) !== Space.sRGB) {
-      let rgbAccurate = toRgb(accurate)
-      accurate = oklch(rgbAccurate)
-    }
-    let aggressive = aggressiveRoundValue(colorToValue(accurate))
-
-    if (isPreciseEnough(aggressive)) {
-      setValue(aggressive);
-      return;
-    }
-
-    let precise = preciseRoundValue(colorToValue(accurate))
-    if (isPreciseEnough(precise)) {
-      setValue(precise);
-      return;
-    }
-
-    setValue(colorToValue(accurate));
-
-  }, [colorCodeInput, outputFormat, value, paintCallbacks]);
+    },
+    [colorCodeInput, outputFormat, setValue]
+  );
 
   const callbackSetSupportValue = useCallback(() => {
     let mediaP3 = window.matchMedia('(color-gamut:p3)');
@@ -283,12 +249,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     paint,
   };
 
-
-
-  useEffect(() => {
-    // For debugging.
-    window.OklchContext = val;
-  }, [val]);
 
   return (
     <OklchContext value={val}>
@@ -348,6 +308,67 @@ function preciseRoundValue<V extends Partial<LchValue>>(
   }
   return rounded
 }
+
+/**
+ * Convert any CSS color string into an `LchValue`.
+ *
+ * The conversion applies several heuristics to preserve the perceived color
+ * in various edge-cases (e.g. `rgb(1 1 1)` rounds to pure white, sRGB ⇄ P3
+ * handling, aggressive / precise rounding, etc.).
+ *
+ * Returns `undefined` when the string cannot be parsed as a valid color.
+ */
+export function codeToLchValue(
+  code: string,
+): LchValue | undefined {
+  let parsed = parseAnything(code);
+  if (!parsed) {
+    return undefined;
+  }
+
+  // Already in OKLCH / LCH form – just translate it.
+  if (parsed.mode === COLOR_FN) {
+    return colorToValue(parsed as AnyLch);
+  }
+
+  // Special-case: `rgb(1 1 1)` is easier to express as Lch white.
+  if (
+    parsed.mode === 'rgb' &&
+    parsed.r === 1 &&
+    parsed.g === 1 &&
+    parsed.b === 1
+  ) {
+    return { a: (parsed.alpha ?? 1) * 100, c: 0, h: 0, l: 1 };
+  }
+
+  let originSpace = getSpace(parsed);
+
+  const isPreciseEnough = (value: LchValue): boolean => {
+    let color = valueToColor(value);
+    if (originSpace !== getSpace(color)) {
+      return false;
+    }
+    return formatHex8(color) === formatHex8(parsed);
+  };
+
+  // Convert to OKLCH to make comparison / rounding easier.
+  let accurate = oklch(parsed);
+  if (originSpace === Space.sRGB && getSpace(accurate) !== Space.sRGB) {
+    accurate = oklch(toRgb(accurate));
+  }
+
+  let aggressive = aggressiveRoundValue(colorToValue(accurate));
+  if (isPreciseEnough(aggressive)) {
+    return aggressive;
+  }
+
+  let precise = preciseRoundValue(colorToValue(accurate));
+  if (isPreciseEnough(precise)) {
+    return precise;
+  }
+
+  return colorToValue(accurate);
+}
 function isRgbInput(colorCodeInput: string): boolean {
   let parsed = parseAnything(colorCodeInput)
   return parsed?.mode === 'rgb'
@@ -393,37 +414,41 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
     chartsToChange = 1
   }
 
-  console.log("runListeners", map, prev, next, chartsToChange);
+  console.log("(fn call) runListeners", map, prev, next, chartsToChange);
 
   for (let [_name, callbacks] of map.entries()) {
-    console.log("runListeners", callbacks);
+    console.log("(inside loop) runListeners", _name, callbacks);
     if (callbacks.l && lChanged) {
-      console.log("l", next.l, chartsToChange);
+      console.log("callback l", next.l, chartsToChange);
       callbacks.l(next.l, chartsToChange)
     }
     if (callbacks.c && cChanged) {
-      console.log("c", next.c, chartsToChange);
+      console.log("callback c", next.c, chartsToChange);
       callbacks.c(next.c, chartsToChange)
     }
     if (callbacks.h && hChanged) {
-      console.log("h", next.h, chartsToChange);
+      console.log("callback h", next.h, chartsToChange);
       callbacks.h(next.h, chartsToChange)
     }
     if (callbacks.alpha && aChanged) {
-      console.log("alpha", next.a, chartsToChange);
+      console.log("callback alpha", next.a, chartsToChange);
       callbacks.alpha(next.a, 0)
     }
 
     if (callbacks.lc && (lChanged || cChanged)) {
+      console.log("callback lc", next);
       callbacks.lc(next)
     }
     if (callbacks.ch && (cChanged || hChanged)) {
+      console.log("callback ch", next);
       callbacks.ch(next)
     }
     if (callbacks.lh && (lChanged || hChanged)) {
+      console.log("callback lh", next);
       callbacks.lh(next)
     }
     if (callbacks.lch && (lChanged || cChanged || hChanged || aChanged)) {
+      console.log("callback lch", next);
       callbacks.lch(next)
     }
   }
