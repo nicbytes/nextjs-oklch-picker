@@ -40,7 +40,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
       },
       l: {
         max: 1,
-        step: L_STEP,
+        step: L_STEP / 100,
         defaultValue: 70,
       },
       c: {

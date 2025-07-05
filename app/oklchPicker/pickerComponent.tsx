@@ -13,6 +13,8 @@ import { Suspense, useEffect, useRef } from "react";
 import AlphaRange from "./components/AlphaRange";
 import Model from "./components/Model";
 import ToggleSwitch from "./components/ToggleSwitch";
+import ColorCodeOklchInput from "./components/ColorCodeOklchInput";
+import ColorCodeFormattedInput from "./components/ColorCodeFormattedInput";
 
 
 const font = Martian_Mono({
@@ -25,32 +27,38 @@ function round2(value: number): number {
   return parseFloat(value.toFixed(2))
 }
 
+function round3(value: number): number {
+  return parseFloat(value.toFixed(3))
+}
+
+
 function round4(value: number): number {
   return parseFloat(value.toFixed(4))
 }
 
-
 export default function OklchPickerComponent() {
-  const { value, setComponents, addPaintCallbacks, showCharts, showP3, showRec2020, setShowP3, setShowRec2020, setShowCharts } = useOklchContext();
+  const { value, setComponents, addPaintCallbacks, colorCodeInput, setColorCodeInput, showCharts, showP3, showRec2020, setShowP3, setShowRec2020, setShowCharts } = useOklchContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     addPaintCallbacks('range-color-setter', {
       lch: (value) => {
-        console.log({value})
+        console.log({ value })
         containerRef.current!.style.setProperty('--range-color', `oklch(${value.l} ${value.c} ${value.h} / ${value.a})`);
       }
     });
   }, [addPaintCallbacks]);
-    
+
   return (
     <>
-      <div ref={containerRef} className={`items-center flex flex-col max-h-[600px] flex-wrap ${rangeStyles.rangeColorSetter}`}>
+      <div ref={containerRef} className={`items-center flex flex-col max-h-[800px] flex-wrap content-center ${rangeStyles.rangeColorSetter}`}>
         <Card>
           <div className="mb-6"></div>
           <div className="px-8">
             <div className="w-[340px] flex flex-col gap-4">
               <ColorSample />
+              <ColorCodeOklchInput id="color-code-input" value={colorCodeInput} label="Color Code" onCommit={setColorCodeInput} />
+              <ColorCodeFormattedInput id="alt-color-code-input" value={colorCodeInput} label="Color Code" onCommit={(value) => { }} />
               <ToggleSwitch label="Show P3" checked={showP3} onChange={setShowP3} />
               <ToggleSwitch label="Show Rec2020" checked={showRec2020} onChange={setShowRec2020} />
             </div>
@@ -58,15 +66,38 @@ export default function OklchPickerComponent() {
           <div className="mb-6"></div>
         </Card>
         <Card>
-        <div className="mb-6"></div>
+          <div className="mx-8 flex flex-col gap-4 my-6">
+            <div className="w-full max-w-[340px] flex justify-between items-center">
+              <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
+              <NumericInput
+                value={String(round2(value.a))}
+                pattern={/^[0-9]*\.?[0-9]*$/}
+                spin
+                onSpin={(action, slow) => {
+                  const step = slow ? 0.01 : 0.1;
+                  const current = Number(value.a) || 0;
+                  const next =
+                    action === 'increase'
+                      ? Math.min(current + step, 1)
+                      : Math.max(current - step, 0);
+                  setComponents({ a: next });
+                }}
+                onChange={(val) => setComponents({ a: parseFloat(val) })}
+              />
+            </div>
+            <AlphaRange />
+          </div>
+        </Card>
+        <Card>
+          <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
             <span className={`text-xl font-mono ${font.className}`}>Lightness</span>
             <NumericInput
-              value={String(round4(value.l))}
+              value={String(round3(value.l))}
               pattern={/^\d*\.?\d*$/}
               spin
               onSpin={(action, slow) => {
-                const step = slow ? 0.01 : 0.1;
+                const step = slow ? 0.001 : 0.05;
                 const current = Number(value.l) || 0;
                 const next =
                   action === 'increase'
@@ -82,11 +113,17 @@ export default function OklchPickerComponent() {
           <div className="mb-6"></div>
         </Card>
         <Card>
-        <div className="mb-6"></div>
+          <Model className="w-[404px] h-[344px]" />
+          <div className="absolute top-8 left-8">
+            <span className={`text-xl font-mono pointer-events-none ${font.className}`}>3D</span>
+          </div>
+        </Card>
+        <Card>
+          <div className="mb-6"></div>
           <div className="w-full max-w-[340px] flex justify-between items-center">
             <span className={`text-xl font-mono ${font.className}`}>Chroma</span>
             <NumericInput
-              value={String(round4(value.c))}
+              value={String(round3(value.c))}
               pattern={/^\d*\.?\d*$/}
               spin
               onSpin={(action, slow) => {
@@ -137,35 +174,6 @@ export default function OklchPickerComponent() {
           <Chart componentType="c" />
           <Range componentType="h" />
           <div className="mb-6"></div>
-        </Card>
-        <Card>
-          <div className="mx-8 flex flex-col gap-4 my-6">
-            <div className="w-full max-w-[340px] flex justify-between items-center">
-              <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
-              <NumericInput
-                value={String(round2(value.a))}
-                pattern={/^[0-9]*\.?[0-9]*$/}
-                spin
-                onSpin={(action, slow) => {
-                  const step = slow ? 0.01 : 0.1;
-                  const current = Number(value.a) || 0;
-                  const next =
-                    action === 'increase'
-                      ? Math.min(current + step, 1)
-                      : Math.max(current - step, 0);
-                  setComponents({ a: next });
-                }}
-                onChange={(val) => setComponents({ a: parseFloat(val) })}
-              />
-            </div>
-          <AlphaRange />
-          </div>
-        </Card>
-        <Card>
-          <Model className="w-[404px] h-[344px]" />
-          <div className="absolute top-8 left-8">
-            <span className={`text-xl font-mono pointer-events-none ${font.className}`}>3D</span>
-          </div>
         </Card>
       </div>
     </>

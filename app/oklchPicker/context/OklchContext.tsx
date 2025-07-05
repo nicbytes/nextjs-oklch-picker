@@ -129,6 +129,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     });
   }, [paintCallbacks]);
 
+  // Set a single component.
   const setComponents = useCallback(
     (parts: Partial<LchValue>) =>
       setValue(prev => ({
@@ -138,6 +139,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     []
   );
 
+  // Force run all listeners.
   const paint = useCallback(() => {
     for (let [_name, callbacks] of paintCallbacks.current.entries()) {
       console.log("runListeners", callbacks);
