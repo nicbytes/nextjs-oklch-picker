@@ -1,7 +1,7 @@
 "use client";
 
 import { useOklchContext } from "../context/OklchContext";
-import { getVisibleValue } from "@/lib/colors";
+import { getVisibleValue } from "../colors";
 import { Martian_Mono } from "next/font/google";
 
 const font = Martian_Mono({

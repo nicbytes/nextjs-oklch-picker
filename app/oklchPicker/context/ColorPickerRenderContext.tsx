@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { PaintData, PaintedData } from "../worker";
-import { rgb, parse } from "@/lib/colors";
+import { rgb, parse } from "../colors";
 import { getCleanCtx } from "../canvas";
 import { SupportValue } from "../type";
 
@@ -17,14 +17,14 @@ interface StartWork<TaskData extends object, ResultData extends object> {
 
 const TOTAL_WORKERS = navigator.hardwareConcurrency;
 
-interface RenderContextType {
+interface ColorPickerRenderContextType {
   startWorkForComponent: (pickerId: string, canvas: HTMLCanvasElement, type: "c" | "h" | "l", value: number, chartsToChange: number, showP3: boolean, showRec2020: boolean, supportValue: SupportValue) => void;
   onWorkersReady: (callback: () => void) => void;
 }
 
-export const RenderContext = createContext<RenderContextType | undefined>(undefined);
+export const ColorPickerRenderContext = createContext<ColorPickerRenderContextType | undefined>(undefined);
 
-export function RenderContextProvider({ children }: { children: React.ReactNode }) {
+export function ColorPickerRenderContextProvider({ children }: { children: React.ReactNode }) {
   const workStarterRef = useRef<StartWork<PaintData, PaintedData>>(null);
   const [startWorkReady, setStartWorkReady] = useState(false);
   const onReadyCallbacks = useRef<(() => void)[]>([]);
@@ -129,14 +129,14 @@ export function RenderContextProvider({ children }: { children: React.ReactNode 
   }, [startWorkReady]);
 
   return (
-    <RenderContext value={{ startWorkForComponent, onWorkersReady }}>
+    <ColorPickerRenderContext value={{ startWorkForComponent, onWorkersReady }}>
       {children}
-    </RenderContext>
+    </ColorPickerRenderContext>
   );
 }
 
-export function useRenderContext(): RenderContextType {
-  let context = useContext(RenderContext);
+export function useRenderContext(): ColorPickerRenderContextType {
+  let context = useContext(ColorPickerRenderContext);
   if (!context) {
     throw new Error('useRenderContext must be used within a RenderContextProvider');
   }

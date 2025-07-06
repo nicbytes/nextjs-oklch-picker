@@ -1,4 +1,4 @@
-import type { Rgb } from '@/lib/colors'
+import type { Rgb } from './colors'
 import { paintCH, paintCL, paintLH } from './paint'
 import { SupportValue } from './type';
 

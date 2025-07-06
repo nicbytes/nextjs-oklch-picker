@@ -3,8 +3,8 @@
 import { useRef, useEffect } from "react";
 import { initCanvasSize } from "../canvas";
 import { useOklchContext } from "../context/OklchContext";
-import { useRenderContext } from "../context/renderContext";
-import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "@/lib/config";
+import { useRenderContext } from "../context/ColorPickerRenderContext";
+import { C_MAX, C_MAX_REC2020, H_MAX, L_MAX } from "../config";
 import { LchValue } from "../type";
 import { Martian_Mono } from "next/font/google";
 

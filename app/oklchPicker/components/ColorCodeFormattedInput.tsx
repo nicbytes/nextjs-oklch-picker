@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, ClipboardEvent } from "react";
 import { Martian_Mono } from "next/font/google";
 import { useOklchContext } from "../context/OklchContext";
-import { AnyLch, AnyRgb, clean, hsl, inRGB, lab, lch, lrgb, oklab, p3, toRgb, valueToColor, parseAnything, isHexNotation } from "@/lib/colors";
+import { AnyLch, AnyRgb, clean, hsl, inRGB, lab, lch, lrgb, oklab, p3, toRgb, valueToColor, parseAnything, isHexNotation } from "../colors";
 import { Color, formatCss, formatHex, formatHex8, formatRgb, Oklab, serializeHex8 } from "culori/fn";
 import { OutputFormats } from "../type";
 

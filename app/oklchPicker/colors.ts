@@ -25,7 +25,7 @@ import {
 } from 'culori/fn'
 
 import { L_MAX, COLOR_FN, L_MAX_COLOR } from './config';
-import { LchValue } from '@/app/oklchPicker/type';
+import { LchValue } from './type';
 
 export type { Rgb } from 'culori/fn'
 

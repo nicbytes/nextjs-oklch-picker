@@ -1,7 +1,7 @@
 "use client";
 
 import { useOklchContext } from "./context/OklchContext";
-import { H_MAX, L_MAX } from "@/lib/config";
+import { H_MAX, L_MAX } from "@/app/oklchPicker/config";
 import Range from "./components/Range";
 import { Martian_Mono } from "next/font/google";
 import { NumericInput } from "./components/NumericInput";
@@ -9,7 +9,7 @@ import Card from "./components/Card";
 import Chart, { getMaxC } from "./components/Chart";
 import ColorSample from "./components/ColorSample";
 import rangeStyles from "./components/Range.module.css";
-import { Suspense, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import AlphaRange from "./components/AlphaRange";
 import Model from "./components/Model";
 import ToggleSwitch from "./components/ToggleSwitch";

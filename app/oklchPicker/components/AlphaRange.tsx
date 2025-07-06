@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useOklchContext } from "../context/OklchContext";
-import { ALPHA_MAX, ALPHA_STEP } from "@/lib/config";
+import { ALPHA_MAX, ALPHA_STEP } from "../config";
 import styles from './Range.module.css';
 
 export default function AlphaRange() {

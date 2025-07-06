@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef } from "react";
 import OklchPicker from "./oklchPicker";
-import { RenderContextProvider } from "./oklchPicker/context/renderContext";
+import { ColorPickerRenderContextProvider } from "./oklchPicker/context/ColorPickerRenderContext";
 import { ColorChoice } from './ColorChoice';
 import { ColorCode } from "./ColorCode";
 
@@ -28,12 +28,12 @@ export default function Home() {
   return (
     <>
       <button onClick={handleWork}>Work</button>
-      <RenderContextProvider>
+      <ColorPickerRenderContextProvider>
       <OklchPicker defaultColorCode="oklch(0.673 0.18 163)" />
       <OklchPicker defaultColorCode="oklch(0.533 0.10 233)" />
       <OklchPicker defaultColorCode="oklch(0.533 0.10 233)" />
         <OklchPicker />
-      </RenderContextProvider>
+      </ColorPickerRenderContextProvider>
 
       <ColorChoice
         color="oklch(0.7 0.15 30)"

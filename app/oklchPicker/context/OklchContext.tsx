@@ -9,11 +9,11 @@ import {
   Space,
   toRgb,
   valueToColor
-} from '@/lib/colors'
+} from '../colors'
 import { formatHex8 } from 'culori/fn'
-import { C_RANDOM, COLOR_FN, L_MAX_COLOR } from "@/lib/config";
+import { C_RANDOM, COLOR_FN, L_MAX_COLOR } from "../config";
 import { LchValue, OutputFormats, SupportValue } from "../type";
-import { useRenderContext } from "./renderContext";
+import { useRenderContext } from "./ColorPickerRenderContext";
 
 export interface OklchContextType {
   /**
@@ -270,19 +270,13 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
 
     if (mapHasAllKeys(paintCallbacks.current, ['chart-for-l', 'chart-for-c', 'chart-for-h'])) {
       initialDraw.current = true;
-      // paint(value);
-      console.log("drawing initial charts")
       onWorkersReady(() => {
-        console.log("drawing initial charts: h")
-        // paintCallbacks.current.get('chart-for-h')!.h!(value.h, 1); // Draw Lightness chart
-        paint(value);
+        paintCallbacks.current.get('chart-for-h')!.h!(value.h, 1); // Draw Lightness chart
+        paintCallbacks.current.get('chart-for-l')!.l!(value.l, 1); // Draw Chroma chart
+        paintCallbacks.current.get('chart-for-c')!.c!(value.c, 1); // Draw Hue chart
       });
-
     }
-
   }, [paintCallbacks.current?.size, value]);
-
-
 
   const setColorCodeInput = useCallback(
     (code: string) => {

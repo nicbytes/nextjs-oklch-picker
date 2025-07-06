@@ -11,7 +11,7 @@ import {
   isHexNotation,
   parseAnything,
   valueToColor,
-} from '@/lib/colors';
+} from '../colors';
 import { useOklchContext } from '../context/OklchContext';
 import { LchValue } from '../type';
 

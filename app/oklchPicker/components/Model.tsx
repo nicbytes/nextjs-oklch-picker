@@ -20,8 +20,8 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { LchValue } from '../type';
-import { AnyRgb, build, rgb, toTarget } from '@/lib/colors';
-import { C_MAX, L_MAX_COLOR } from '@/lib/config';
+import { AnyRgb, build, rgb, toTarget } from '../colors';
+import { C_MAX, L_MAX_COLOR } from '../config';
 import { useOklchContext } from '../context/OklchContext';
 
 // --- Type Definitions ---
