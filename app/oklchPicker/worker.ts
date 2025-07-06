@@ -23,8 +23,8 @@ export type PaintedData = {
   width: number
 }
 
-addEventListener("message", (e: MessageEvent<PaintData>) => {
-  let start = Date.now()
+self.onmessage = (e: MessageEvent<PaintData>) => {
+  const start = Date.now()
 
   let image: ImageData
   if (e.data.type === 'l') {
@@ -68,11 +68,11 @@ addEventListener("message", (e: MessageEvent<PaintData>) => {
     )
   }
 
-  let message: PaintedData = {
+  const message: PaintedData = {
     from: e.data.from,
-    pixels: image.data.buffer,
+    pixels: image.data.slice().buffer,
     time: Date.now() - start,
     width: image.width
   }
-  postMessage(message, [image.data.buffer])
-});
+  self.postMessage(message, [message.pixels])
+};

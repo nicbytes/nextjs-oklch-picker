@@ -21,10 +21,6 @@ function round2(value: number): number {
   return parseFloat(value.toFixed(2))
 }
 
-function round4(value: number): number {
-  return parseFloat(value.toFixed(4))
-}
-
 export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
   const { pickerId, setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks } = useOklchContext();
   const { startWorkForComponent } = useRenderContext();
@@ -84,7 +80,7 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     }
 
     initEvents(chartRef.current);
-  }, [showRec2020]);
+  }, [showRec2020, componentType, setComponents, xComponent, yComponent]);
 
   useEffect(() => {
     addPaintCallbacks(`chart-for-${componentType}`, {
@@ -105,7 +101,7 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
         containingDivRef.current!.style.setProperty('--chart-l', `${round2((100 * l) / L_MAX)}%`);
       }
     });
-  }, [pickerId, componentType, showCharts, showP3, showRec2020, supportValue]);
+  }, [pickerId, componentType, showCharts, showP3, showRec2020, supportValue, addPaintCallbacks, startWorkForComponent]);
 
   const xPositionVariable = `--chart-${xComponent.toLowerCase()}`;
   const yPositionVariable = `--chart-${yComponent.toLowerCase()}`;
@@ -150,9 +146,9 @@ function setComponentsFromSpace(
   setComponents: (parts: Partial<LchValue>) => void,
   showRec2020: boolean = false,
 ): void {
-  let rect = space.getBoundingClientRect()
-  let x = clamp(mouseX - rect.left, 0, rect.width)
-  let y = clamp(rect.height - (mouseY - rect.top), 0, rect.height)
+  const rect = space.getBoundingClientRect()
+  const x = clamp(mouseX - rect.left, 0, rect.width)
+  const y = clamp(rect.height - (mouseY - rect.top), 0, rect.height)
   if (componentType === 'l') {
     setComponents({
       c: (getMaxC(showRec2020) * y) / rect.height,

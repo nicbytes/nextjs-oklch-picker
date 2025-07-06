@@ -3,8 +3,6 @@ import React, {
   useEffect,
   useRef,
   useState,
-  KeyboardEvent,
-  MouseEvent
 } from 'react';
 import { Martian_Mono } from "next/font/google";
 
@@ -52,11 +50,11 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     if (!el) return;
     const onFocus = () => {
       el.select();
-      const prevent = (e: MouseEvent) => {
+      const prevent = (e: globalThis.MouseEvent) => {
         e.preventDefault();
-        el.removeEventListener('mouseup', prevent as any);
+        el.removeEventListener('mouseup', prevent);
       };
-      el.addEventListener('mouseup', prevent as any);
+      el.addEventListener('mouseup', prevent);
     };
     el.addEventListener('focus', onFocus);
     return () => el.removeEventListener('focus', onFocus);
@@ -64,13 +62,13 @@ export const NumericInput: React.FC<NumericInputProps> = ({
 
   /* ---------- Blur on escape ---------- */
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
+    const listener = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape' && e.target === inputRef.current) {
         (e.target as HTMLInputElement).blur();
       }
     };
-    window.addEventListener('keyup', listener as any);
-    return () => window.removeEventListener('keyup', listener as any);
+    window.addEventListener('keyup', listener);
+    return () => window.removeEventListener('keyup', listener);
   }, []);
 
   /* ---------- Spin-button helpers ---------- */
@@ -81,7 +79,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     [onSpin]
   );
 
-  const makeSpinHandler = (action: SpinAction) => (e: MouseEvent) => {
+  const makeSpinHandler = (action: SpinAction) => (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     e.preventDefault();
     inputRef.current?.focus();
@@ -124,7 +122,6 @@ export const NumericInput: React.FC<NumericInputProps> = ({
         onChange={e => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         pattern={pattern?.source}
-        aria-valuenow={spin ? value : undefined}
       />
       {spin && (
         <div className="flex flex-col self-stretch ml-2">

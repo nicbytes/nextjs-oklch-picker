@@ -32,7 +32,7 @@ function round3(value: number): number {
 }
 
 export default function OklchPickerComponent() {
-  const { value, setComponents, addPaintCallbacks, colorCodeInput, setColorCodeInput, showCharts, showP3, showRec2020, setShowP3, setShowRec2020, setShowCharts } = useOklchContext();
+  const { value, setComponents, addPaintCallbacks, colorCodeInput, setColorCodeInput, showP3, showRec2020, setShowP3, setShowRec2020 } = useOklchContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function OklchPickerComponent() {
             <div className="w-[340px] flex flex-col gap-4">
               <ColorSample />
               <ColorCodeOklchInput id="color-code-input" value={colorCodeInput} label="Color Code" onCommit={setColorCodeInput} />
-              <ColorCodeFormattedInput id="alt-color-code-input" value={colorCodeInput} label="Color Code" onCommit={(value) => { }} />
+              <ColorCodeFormattedInput id="alt-color-code-input" value={colorCodeInput} label="Color Code" onCommit={() => { }} />
               <ToggleSwitch label="Show P3" checked={showP3} onChange={setShowP3} />
               <ToggleSwitch label="Show Rec2020" checked={showRec2020} onChange={setShowRec2020} />
             </div>

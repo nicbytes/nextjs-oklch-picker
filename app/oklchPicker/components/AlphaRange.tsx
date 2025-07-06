@@ -9,9 +9,8 @@ export default function AlphaRange() {
   const { value, setComponents } = useOklchContext();
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value)
     setComponents({ a: parseFloat(e.target.value) });
-  }, []);
+  }, [setComponents]);
 
   useEffect(() => {
     if (!colorDivRef.current) return;
@@ -51,7 +50,7 @@ export default function AlphaRange() {
 }
 
 export function getBorders(): [string, string] {
-  let styles = window.getComputedStyle(document.body)
+  const styles = window.getComputedStyle(document.body)
   return [
     styles.getPropertyValue('--border-p3') || '#fff',
     styles.getPropertyValue('--border-rec2020') || '#fff'

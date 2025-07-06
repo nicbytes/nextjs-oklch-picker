@@ -16,10 +16,10 @@ export interface GetSeparator {
 }
 
 export function generateGetSeparator(): GetSeparator {
-  let separators: Separators = {}
+  const separators: Separators = {}
 
   return function (prevSpace, nextSpace) {
-    let line = separators[`${prevSpace}${nextSpace}`]
+    const line = separators[`${prevSpace}${nextSpace}`]
     if (line) {
       return line
     } else {
@@ -34,7 +34,7 @@ export function paintPixel(
   y: number,
   pixel: Pixel
 ): void {
-  let pos = 4 * ((pixels.height - y) * pixels.width + x)
+  const pos = 4 * ((pixels.height - y) * pixels.width + x)
   pixels.data[pos] = pixel[1]
   pixels.data[pos + 1] = pixel[2]
   pixels.data[pos + 2] = pixel[3]
@@ -51,12 +51,12 @@ function separate(
   if (line.length > 0) {
     let prevY = line[0][1]
     let prevX = 0
-    for (let [x, y] of line) {
+    for (const [x, y] of line) {
       if (x > prevX + 1) {
         prevY = line[0][1]!
       }
       if (Math.abs(prevY - y) < 10) {
-        let pos = 4 * (y * pixels.width + x)
+        const pos = 4 * (y * pixels.width + x)
         pixels.data[pos] = Math.round(color.r * 255)
         pixels.data[pos + 1] = Math.round(color.g * 255)
         pixels.data[pos + 2] = Math.round(color.b * 255)
@@ -81,16 +81,16 @@ function paint(
   borderRec2020: Rgb,
   getColor: GetColor
 ): ImageData {
-  let getPixel = generateGetPixel(
+  const getPixel = generateGetPixel(
     getColor,
     showP3,
     showRec2020,
     supportValue.p3
   )
-  let getSeparator = generateGetSeparator()
-  let maxGap = 0.42 * height
+  const getSeparator = generateGetSeparator()
+  const maxGap = 0.42 * height
 
-  let pixels = new ImageData(to - from + 1, height)
+  const pixels = new ImageData(to - from + 1, height)
   for (let x = 0; x <= to - from; x += 1) {
     let nextPixel: Pixel
     let pixel = getPixel(from + x, 0)
@@ -105,7 +105,7 @@ function paint(
 
         let prevIPixel = pixel
         for (let i = 1; i <= block; i++) {
-          let iPixel = getPixel(from + x, y + i)
+          const iPixel = getPixel(from + x, y + i)
           if (iPixel[0] !== prevIPixel[0]) {
             getSeparator(prevIPixel[0], iPixel[0]).push([x, height - y - i])
           }
@@ -159,8 +159,8 @@ export function paintCL(
   borderP3: Rgb,
   borderRec2020: Rgb
 ): ImageData {
-  let lFactor = L_MAX_COLOR / width
-  let cFactor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / height
+  const lFactor = L_MAX_COLOR / width
+  const cFactor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / height
 
   return paint(
     height,
@@ -189,8 +189,8 @@ export function paintCH(
   borderP3: Rgb,
   borderRec2020: Rgb
 ): ImageData {
-  let hFactor = H_MAX / width
-  let cFactor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / height
+  const hFactor = H_MAX / width
+  const cFactor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / height
 
   return paint(
     height,
@@ -219,8 +219,8 @@ export function paintLH(
   borderP3: Rgb,
   borderRec2020: Rgb
 ): ImageData {
-  let hFactor = H_MAX / width
-  let lFactor = L_MAX_COLOR / height
+  const hFactor = H_MAX / width
+  const lFactor = L_MAX_COLOR / height
 
   return paint(
     height,

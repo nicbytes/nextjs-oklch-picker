@@ -12,7 +12,7 @@ const font = Martian_Mono({
 });
 
 function formatOklab(color: Oklab): string {
-  let { a, alpha, b, l } = color
+  const { a, alpha, b, l } = color
   let postfix = ''
   if (typeof alpha !== 'undefined' && alpha < 1) {
     postfix = ` / ${clean(alpha)}`
@@ -21,14 +21,14 @@ function formatOklab(color: Oklab): string {
 }
 
 function formatVec(color: AnyRgb): string {
-  let { alpha, b, g, r } = color
-  let a = alpha ?? 1
+  const { alpha, b, g, r } = color
+  const a = alpha ?? 1
   return `vec(${clean(r, 5)}, ${clean(g, 5)}, ${clean(b, 5)}, ${clean(a, 5)})`
 }
 
 function toNumbers(color: AnyLch): string {
-  let { alpha, c, h, l } = color
-  let prefix = `${clean(l)}, ${clean(c)}, ${clean(h ?? 0)}`
+  const { alpha, c, h, l } = color
+  const prefix = `${clean(l)}, ${clean(c)}, ${clean(h ?? 0)}`
   if (typeof alpha !== 'undefined' && alpha < 1) {
     return `${prefix}, ${clean(alpha)}`
   } else {
@@ -41,18 +41,18 @@ function cleanComponents<Obj extends object>(
   precision?: number
 ): Obj {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let result: any = {}
-  for (let key in color) {
-    let value = color[key]
+  const result: any = {}
+  for (const key in color) {
+    const value = color[key]
     if (typeof value === 'number' && key !== 'alpha') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+       
       result[key] = clean(value, precision)
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+       
       result[key] = color[key]
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+   
   return result
 }
 

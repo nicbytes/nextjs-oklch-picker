@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useOklchContext } from "../context/OklchContext";
-import { useRenderContext } from "../context/ColorPickerRenderContext";
 import { ALPHA_MAX, ALPHA_STEP, C_MAX, C_MAX_REC2020, C_STEP, H_MAX, H_STEP, L_MAX_COLOR, L_STEP } from "../config";
 import styles from './Range.module.css';
 import { getCleanCtx, initCanvasSize } from "../canvas";
@@ -9,7 +8,7 @@ import { LchValue, SupportValue } from "../type";
 
 export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c' | 'h' }) {
 
-  const { value, setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks} = useOklchContext();
+  const { value, setComponents, supportValue, showP3, showRec2020, addPaintCallbacks} = useOklchContext();
 
   const divRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,7 +20,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
     const list = dataListRef.current;
     list.replaceChildren(
       ...values.map(value => {
-        let option = document.createElement('option')
+        const option = document.createElement('option')
         option.value = String(value)
           .replace(/(0{5,}\d|9{5,}\d)/, '')
           .replace(/\.$/, '')
@@ -31,27 +30,23 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
   };
 
   const inputValue = value[componentType];
-  const {max, step, defaultValue} = useMemo(() => {
+  const {max, step} = useMemo(() => {
     return {
       a: {
         max: ALPHA_MAX,
         step: ALPHA_STEP / 100,
-        defaultValue: 100,
       },
       l: {
         max: 1,
         step: L_STEP / 100,
-        defaultValue: 70,
       },
       c: {
         max: showRec2020 ? C_MAX_REC2020 : C_MAX,
         step: C_STEP / 100,
-        defaultValue: 0.1,
       },
       h: {
         max: H_MAX,
         step: H_STEP / 100,
-        defaultValue: 286,
       }
     }[componentType];
   }, [componentType, showRec2020]);
@@ -62,15 +57,15 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
 
   useEffect(() => {
     const callback = () => {
-      if (!canvasRef.current) return ["ch", (v: LchValue) => {}];
-      if (!inputRef.current) return ["ch", (v: LchValue) => {}];
-      let painters = {
+      if (!canvasRef.current) return ["ch", () => {}];
+      if (!inputRef.current) return ["ch", () => {}];
+      const painters = {
         ch(value: LchValue) {
-          let color = valueToColor(value);
-          let c = color.c
-          let h = color.h ?? 0
-          let [width, height] = initCanvasSize(canvasRef.current!)
-          let factor = L_MAX_COLOR / width
+          const color = valueToColor(value);
+          const c = color.c
+          const h = color.h ?? 0
+          const [width, height] = initCanvasSize(canvasRef.current!)
+          const factor = L_MAX_COLOR / width
           setList(
             paint(
               canvasRef.current!,
@@ -88,9 +83,9 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
           )
         },
         lc(value: LchValue) {
-          let { c, l } = valueToColor(value)
-          let [width, height] = initCanvasSize(canvasRef.current!)
-          let factor = H_MAX / width
+          const { c, l } = valueToColor(value)
+          const [width, height] = initCanvasSize(canvasRef.current!)
+          const factor = H_MAX / width
           setList(
             paint(
               canvasRef.current!,
@@ -108,11 +103,11 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
           )
         },
         lh(value: LchValue) {
-          let color = valueToColor(value)
-          let l = color.l
-          let h = color.h ?? 0
-          let [width, height] = initCanvasSize(canvasRef.current!)
-          let factor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / width
+          const color = valueToColor(value)
+          const l = color.l
+          const h = color.h ?? 0
+          const [width, height] = initCanvasSize(canvasRef.current!)
+          const factor = (showRec2020 ? C_MAX_REC2020 : C_MAX) / width
           setList(
             paint(
               canvasRef.current!,
@@ -141,11 +136,11 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
     if (componentType !== 'a') {
       const [type, painter] = callback!();
       addPaintCallbacks(`range-for-${componentType}`, {
-        [type]: painter,
+        [type as string]: painter,
       });
     }
 
-  }, [showRec2020, showP3, showRec2020, componentType]);
+  }, [addPaintCallbacks, componentType, showP3, showRec2020, step, supportValue]);
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (componentType === 'l') {
@@ -155,7 +150,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
     } else if (componentType === 'h') {
       setComponents({ h: parseFloat(e.target.value) });
     }
-  }, []);
+  }, [componentType, setComponents]);
 
   return (
     <div ref={divRef} className="relative box-border h-10 border border-zinc-500/40 border-dashed block rounded-xl w-[340px]">
@@ -171,7 +166,7 @@ export default function Range({ componentType }: { componentType: 'a' | 'l' | 'c
 }
 
 export function getBorders(): [string, string] {
-  let styles = window.getComputedStyle(document.body)
+  const styles = window.getComputedStyle(document.body)
   return [
     styles.getPropertyValue('--border-p3') || '#fff',
     styles.getPropertyValue('--border-rec2020') || '#fff'
@@ -189,29 +184,29 @@ function paint(
   showP3: boolean,
   showRec2020: boolean,
 ): number[] {
-  let ctx = getCleanCtx(canvas, supportValue)
-  let halfHeight = Math.floor(height / 2)
-  let [borderP3, borderRec2020] = getBorders()
-  let getSpace = generateGetSpace(showP3, showRec2020)
+  const ctx = getCleanCtx(canvas, supportValue)
+  const halfHeight = Math.floor(height / 2)
+  const [borderP3, borderRec2020] = getBorders()
+  const getSpace = generateGetSpace(showP3, showRec2020)
 
-  let stops: number[] = []
+  const stops: number[] = []
   function addStop(x: number, round: (num: number) => number): void {
-    let origin = getColor(x)
-    let value = origin[type] ?? 0
+    const origin = getColor(x)
+    const value = origin[type] ?? 0
     stops.push(round(value / sliderStep) * sliderStep)
   }
 
   let prevSpace = getSpace(getColor(0))
   for (let x = 0; x <= width; x++) {
-    let color = getColor(x)
-    let space = getSpace(color)
+    const color = getColor(x)
+    const space = getSpace(color)
     if (space !== Space.Out) {
       ctx.fillStyle = canvasFormat(color)
       if (space === Space.sRGB) {
         ctx.fillRect(x, 0, 1, height)
       } else {
         ctx.fillRect(x, 0, 1, halfHeight)
-        let fallback = toRgb(color)
+        const fallback = toRgb(color)
         ctx.fillStyle = fastFormat(fallback)
         ctx.fillRect(x, halfHeight, 1, halfHeight + 1)
       }

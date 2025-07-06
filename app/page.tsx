@@ -2,8 +2,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import OklchPicker from "./oklchPicker";
 import { ColorPickerRenderContextProvider } from "./oklchPicker/context/ColorPickerRenderContext";
-import { ColorChoice } from './ColorChoice';
-import { ColorCode } from "./ColorCode";
 
 export default function Home() {
 
@@ -34,14 +32,6 @@ export default function Home() {
       <OklchPicker defaultColorCode="oklch(0.533 0.10 233)" />
         <OklchPicker />
       </ColorPickerRenderContextProvider>
-
-      <ColorChoice
-        color="oklch(0.7 0.15 30)"
-        variableName="--primary-color"
-        onEdit={() => console.log('Edit clicked!')}
-      />
-
-      <ColorCode />
     </>
   );
 

@@ -1,6 +1,5 @@
 import {
   type Color,
-  formatCss,
   formatRgb as formatRgbFast,
   inGamut,
   type Lch,
@@ -32,22 +31,24 @@ export type { Rgb } from 'culori/fn'
 export type AnyLch = Lch | Oklch
 export type AnyRgb = Lrgb | P3 | Rec2020 | Rgb
 
-export let rec2020 = useMode(modeRec2020)
-export let oklch = useMode(modeOklch)
-export let oklab = useMode(modeOklab)
-export let xyz65 = useMode(modeXyz65)
-export let rgb = useMode(modeRgb)
-export let lch = useMode(modeLch)
-export let hsl = useMode(modeHsl)
-export let lab = useMode(modeLab)
-export let lrgb = useMode(modeLrgb)
-export let p3 = useMode(modeP3)
+/* eslint-disable react-hooks/rules-of-hooks */
+export const rec2020 = useMode(modeRec2020)
+export const oklch = useMode(modeOklch)
+export const oklab = useMode(modeOklab)
+export const xyz65 = useMode(modeXyz65)
+export const rgb = useMode(modeRgb)
+export const lch = useMode(modeLch)
+export const hsl = useMode(modeHsl)
+export const lab = useMode(modeLab)
+export const lrgb = useMode(modeLrgb)
+export const p3 = useMode(modeP3)
+/* eslint-enable react-hooks/rules-of-hooks */
 
 const COLOR_SPACE_GAP = 0.0001
 
 // Dirty fix of https://github.com/Evercoder/culori/issues/249
 export function inRGB(color: Color): boolean {
-  let check = rgb(color)
+  const check = rgb(color)
   return (
     check.r >= -COLOR_SPACE_GAP &&
     check.r <= 1 + COLOR_SPACE_GAP &&
@@ -64,23 +65,7 @@ export function build(l: number, c: number, h: number, alpha = 1): AnyLch {
   return { alpha, c, h, l, mode: COLOR_FN }
 }
 
-// export function buildForCSS(
-//   l: number,
-//   c: number,
-//   h: number,
-//   alpha = 1
-// ): string {
-//   if (support.get().p3) {
-//     return formatLch(build(l, c, h, alpha))
-//   } else {
-//     return formatRgb(toRgb(build(l, c, h, alpha)))
-//   }
-// }
-
-export let toTarget: (color: Color) => AnyLch
-toTarget = oklch
-
-export let canvasFormat: (c: AnyLch) => string = formatRgbFast
+export const canvasFormat: (c: AnyLch) => string = formatRgbFast
 
 export function fastFormat(color: Color): string {
   if (color.mode === COLOR_FN) {
@@ -89,13 +74,6 @@ export function fastFormat(color: Color): string {
     return formatRgbFast(color)
   }
 }
-function formatP3Css(c: Color): string {
-  return formatCss(p3(c))
-}
-
-// support.subscribe(value => {
-//   canvasFormat = value.p3 ? formatP3Css : formatRgbFast
-// })
 
 export function parse(value: string): Color | undefined {
   return originParse(value.trim())
@@ -116,12 +94,12 @@ export function forceP3(color: Color): P3 {
   return { ...rgb(color), mode: 'p3' }
 }
 
-export let toRgb = toGamut('rgb', COLOR_FN)
+export const toRgb = toGamut('rgb', COLOR_FN)
 
 export function formatRgb(color: Rgb): string {
-  let r = Math.round(25500 * color.r) / 100
-  let g = Math.round(25500 * color.g) / 100
-  let b = Math.round(25500 * color.b) / 100
+  const r = Math.round(25500 * color.r) / 100
+  const g = Math.round(25500 * color.g) / 100
+  const b = Math.round(25500 * color.b) / 100
   if (typeof color.alpha !== 'undefined' && color.alpha < 1) {
     return `rgba(${r}, ${g}, ${b}, ${color.alpha})`
   } else {
@@ -130,7 +108,7 @@ export function formatRgb(color: Rgb): string {
 }
 
 export function formatLch(color: AnyLch): string {
-  let { alpha, c, h, l } = color
+  const { alpha, c, h, l } = color
   let postfix = ''
   if (typeof alpha !== 'undefined' && alpha < 1) {
     postfix = ` / ${clean(100 * alpha)}%`
@@ -153,7 +131,7 @@ export function isHexNotation(value: string): boolean {
 export type Space = number
 
 // Hack for enum without enum
-// eslint-disable-next-line @typescript-eslint/no-redeclare
+ 
 export const Space = {
   Out: 3,
   P3: 1,
@@ -161,11 +139,10 @@ export const Space = {
   sRGB: 0
 }
 
-let getProxyColor: (color: Color) => Color
-getProxyColor = rgb
+const getProxyColor: (color: Color) => Color = rgb;
 
 export function getSpace(color: Color): Space {
-  let proxyColor = getProxyColor(color)
+  const proxyColor = getProxyColor(color)
   if (inRGB(proxyColor)) {
     return Space.sRGB
   } else if (inP3(proxyColor)) {
@@ -185,7 +162,7 @@ export function generateGetSpace(
 ): GetSpace {
   if (showP3 && showRec2020) {
     return color => {
-      let proxyColor = getProxyColor(color)
+      const proxyColor = getProxyColor(color)
       if (inRGB(proxyColor)) {
         return Space.sRGB
       } else if (inP3(proxyColor)) {
@@ -198,7 +175,7 @@ export function generateGetSpace(
     }
   } else if (showP3 && !showRec2020) {
     return color => {
-      let proxyColor = getProxyColor(color)
+      const proxyColor = getProxyColor(color)
       if (inRGB(proxyColor)) {
         return Space.sRGB
       } else if (inP3(proxyColor)) {
@@ -209,7 +186,7 @@ export function generateGetSpace(
     }
   } else if (!showP3 && showRec2020) {
     return color => {
-      let proxyColor = getProxyColor(color)
+      const proxyColor = getProxyColor(color)
       if (inRGB(proxyColor)) {
         return Space.sRGB
       } else if (inRec2020(proxyColor)) {
@@ -242,10 +219,10 @@ export function generateGetPixel(
   if (showP3 && showRec2020) {
     if (p3Support) {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorP3 = p3(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorP3 = p3(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorP3.r),
           Math.floor(255 * colorP3.g),
@@ -262,10 +239,10 @@ export function generateGetPixel(
       }
     } else {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorSRGB = rgb(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorSRGB = rgb(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorSRGB.r),
           Math.floor(255 * colorSRGB.g),
@@ -284,10 +261,10 @@ export function generateGetPixel(
   } else if (showP3 && !showRec2020) {
     if (p3Support) {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorP3 = p3(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorP3 = p3(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorP3.r),
           Math.floor(255 * colorP3.g),
@@ -302,10 +279,10 @@ export function generateGetPixel(
       }
     } else {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorSRGB = rgb(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorSRGB = rgb(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorSRGB.r),
           Math.floor(255 * colorSRGB.g),
@@ -322,10 +299,10 @@ export function generateGetPixel(
   } else if (!showP3 && showRec2020) {
     if (p3Support) {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorP3 = p3(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorP3 = p3(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorP3.r),
           Math.floor(255 * colorP3.g),
@@ -340,10 +317,10 @@ export function generateGetPixel(
       }
     } else {
       return (x, y) => {
-        let color = getColor(x, y)
-        let proxyColor = getProxyColor(color)
-        let colorSRGB = rgb(proxyColor)
-        let pixel: Pixel = [
+        const color = getColor(x, y)
+        const proxyColor = getProxyColor(color)
+        const colorSRGB = rgb(proxyColor)
+        const pixel: Pixel = [
           Space.Out,
           Math.floor(255 * colorSRGB.r),
           Math.floor(255 * colorSRGB.g),
@@ -359,10 +336,10 @@ export function generateGetPixel(
     }
   } else if (p3Support) {
     return (x, y) => {
-      let color = getColor(x, y)
-      let proxyColor = getProxyColor(color)
-      let colorP3 = p3(proxyColor)
-      let pixel: Pixel = [
+      const color = getColor(x, y)
+      const proxyColor = getProxyColor(color)
+      const colorP3 = p3(proxyColor)
+      const pixel: Pixel = [
         Space.Out,
         Math.floor(255 * colorP3.r),
         Math.floor(255 * colorP3.g),
@@ -375,9 +352,9 @@ export function generateGetPixel(
     }
   } else {
     return (x, y) => {
-      let color = getColor(x, y)
-      let colorSRGB = rgb(color)
-      let pixel: Pixel = [
+      const color = getColor(x, y)
+      const colorSRGB = rgb(color)
+      const pixel: Pixel = [
         Space.Out,
         Math.floor(255 * colorSRGB.r),
         Math.floor(255 * colorSRGB.g),
@@ -401,10 +378,10 @@ export interface VisibleValue {
 }
 
 export function getVisibleValue(value: LchValue, p3: boolean, rec2020: boolean): VisibleValue {
-  let color = valueToColor(value)
-  let space = getSpace(color)
+  const color = valueToColor(value)
+  const space = getSpace(color)
   if (space === Space.sRGB) {
-    let rgbCss = formatRgb(rgb(color))
+    const rgbCss = formatRgb(rgb(color))
     return {
       color,
       fallback: rgbCss,
@@ -412,8 +389,8 @@ export function getVisibleValue(value: LchValue, p3: boolean, rec2020: boolean):
       space: 'srgb'
     }
   } else {
-    let rgbColor = toRgb(color)
-    let fallback = formatRgb(rgbColor)
+    const rgbColor = toRgb(color)
+    const fallback = formatRgb(rgbColor)
     if (space === Space.P3) {
       return {
         color: p3 ? color : rgbColor,

@@ -20,7 +20,7 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { LchValue } from '../type';
-import { AnyRgb, build, rgb, toTarget } from '../colors';
+import { AnyRgb, build, oklch, rgb } from '../colors';
 import { C_MAX, L_MAX_COLOR } from '../config';
 import { useOklchContext } from '../context/OklchContext';
 
@@ -33,11 +33,6 @@ interface UpdateSlice {
 }
 
 export interface ModelProps {
-  /**
-   * Whether the user can interact with the model (pan, zoom, rotate).
-   * @default false
-   */
-  isInteractive?: boolean;
   /**
    * Optional class name for the container.
    */
@@ -59,7 +54,7 @@ function getModelData(mode: RgbMode): [Vector3[], number[]] {
       for (let z = 0; z <= 1; z += 0.01) {
         if (onGamutEdge(x, y, z)) {
           const edgeRgb: AnyRgb = { b: z, g: y, mode, r: x };
-          const to = toTarget(edgeRgb);
+          const to = oklch(edgeRgb);
           if (to.h) {
             colors.push(edgeRgb.r, edgeRgb.g, edgeRgb.b);
             coordinates.push(
@@ -195,7 +190,7 @@ function initScene(
 /**
  * A React component that renders an interactive 3D model of an OKLCH color space.
  */
-export default function Model({ isInteractive = false, className }: ModelProps) {
+export default function Model({ className }: ModelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { value: colorValue, showP3, showRec2020 } = useOklchContext();
 
@@ -216,7 +211,7 @@ export default function Model({ isInteractive = false, className }: ModelProps) 
     if (!canvas) return;
 
     ColorManagement.enabled = false;
-    const [scene, camera, renderer, controls] = initScene(canvas, isInteractive);
+    const [scene, camera, renderer, controls] = initScene(canvas, false);
     stateRef.current = { renderer, scene, camera, controls };
 
     const animate = () => {
@@ -273,7 +268,7 @@ export default function Model({ isInteractive = false, className }: ModelProps) 
 
     const updateSliceFn = generateMesh(scene, rgbMode);
     stateRef.current.updateSlice = updateSliceFn;
-  }, [!stateRef.current, rgbMode])
+  }, [rgbMode])
 
   // Update the model to the latest color
   useEffect(() => {

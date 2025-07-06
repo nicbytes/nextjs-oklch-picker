@@ -72,19 +72,19 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
 
     const workKey = `${pickerId}-${type}`;
 
-    let [cssP3, cssRec2020] = getBorders()
-    let borderP3 = rgb(parse(cssP3)!)
-    let borderRec2020 = rgb(parse(cssRec2020)!)
+    const [cssP3, cssRec2020] = getBorders()
+    const borderP3 = rgb(parse(cssP3)!)
+    const borderRec2020 = rgb(parse(cssRec2020)!)
 
-    let parts: [ImageData, number][] = []
+    const parts: [ImageData, number][] = []
     console.log("hit");
     startWork(
       workKey, 
       chartsToChange,
       messages =>
         messages.map((_, i) => {
-          let step = Math.floor(canvas.width / messages.length)
-          let from = step * i + (i === 0 ? 0 : 1)
+          const step = Math.floor(canvas.width / messages.length)
+          const from = step * i + (i === 0 ? 0 : 1)
           let to = Math.min(step * (i + 1), canvas.width)
           if (i === messages.length - 1) to = canvas.width
           return {
@@ -112,8 +112,8 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
         ])
       },
       () => {
-        let ctx = getCleanCtx(canvas, supportValue)
-        for (let [image, from] of parts) {
+        const ctx = getCleanCtx(canvas, supportValue)
+        for (const [image, from] of parts) {
           ctx.putImageData(image, from, 0)
         }
       }
@@ -136,7 +136,7 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
 }
 
 export function useRenderContext(): ColorPickerRenderContextType {
-  let context = useContext(ColorPickerRenderContext);
+  const context = useContext(ColorPickerRenderContext);
   if (!context) {
     throw new Error('useRenderContext must be used within a RenderContextProvider');
   }
@@ -149,24 +149,24 @@ function anyValue<V>(map: Map<string, V>): undefined | V {
 }
 
 export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void] {
-  let available = new Array<Worker>(TOTAL_WORKERS);
+  const available = new Array<Worker>(TOTAL_WORKERS);
   for (let i = 0; i < available.length; i++) {
     available[i] = new Worker(new URL('../worker.ts', import.meta.url));
   }
 
-  let busy = new Set<string>();
-  let lastPending = new Map<string, Parameters<StartWork<PaintData, PaintedData>>>();
+  const busy = new Set<string>();
+  const lastPending = new Map<string, Parameters<StartWork<PaintData, PaintedData>>>();
 
   function startPending(
     args: Parameters<StartWork<PaintData, PaintedData>> | undefined
   ): void {
     if (!args) return
-    let type = args[0]
+    const type = args[0]
     lastPending.delete(type)
     startWork(type, 1, args[2], args[3], args[4])
   }
 
-  let startWork: StartWork<PaintData, PaintedData> = (
+  const startWork: StartWork<PaintData, PaintedData> = (
     type,
     parallelTasks,
     prepare,
@@ -190,10 +190,10 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
 
     busy.add(type)
     let finished = 0
-    let workers = available.splice(0, started)
-    let messages = prepare(Array(workers.length).fill(undefined) as undefined[])
+    const workers = available.splice(0, started)
+    const messages = prepare(Array(workers.length).fill(undefined) as undefined[])
 
-    for (let [i, worker] of workers.entries()) {
+    for (const [i, worker] of workers.entries()) {
       worker.onmessage = (e: MessageEvent<PaintedData>) => {
         onResult(e.data)
         available.push(worker)
@@ -210,7 +210,7 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
   }
 
   const terminateWorkers = () => {
-    for (let worker of available) {
+    for (const worker of available) {
       worker.terminate()
     }
   };
@@ -220,7 +220,7 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
 }
 
 export function getBorders(): [string, string] {
-  let styles = window.getComputedStyle(document.body)
+  const styles = window.getComputedStyle(document.body)
   return [
     styles.getPropertyValue('--border-p3') || '#fff',
     styles.getPropertyValue('--border-rec2020') || '#fff'
