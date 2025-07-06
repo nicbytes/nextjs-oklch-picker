@@ -1,6 +1,6 @@
 {
-  "name": "nextjs-oklch-picker2",
-  "version": "0.1.0",
+  "name": "nextjs-oklch-picker",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
