@@ -42,7 +42,18 @@ export default function Home() {
   };
 
   return (
-    <>
+    <main className="p-4">
+      <header className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">OKLCH Color Picker</h1>
+        <a
+          href="https://github.com/nicbytes/nextjs-oklch-picker"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          GitHub
+        </a>
+      </header>
       <ColorPickerRenderContextProvider>{pickers}</ColorPickerRenderContextProvider>
       <div className="fixed bottom-5 right-5 flex gap-2">
         <button
@@ -60,6 +71,6 @@ export default function Home() {
           -
         </button>
       </div>
-    </>
+    </main>
   );
 }
