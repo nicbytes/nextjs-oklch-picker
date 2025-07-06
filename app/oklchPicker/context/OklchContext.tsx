@@ -503,6 +503,7 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
   }
 
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const [_name, callbacks] of map.entries()) {
     if (callbacks.l && lChanged) {
       callbacks.l(next.l, chartsToChange)
