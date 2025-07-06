@@ -45,130 +45,136 @@ export default function OklchPickerComponent() {
 
   return (
     <>
-      <div ref={containerRef} className={`items-center flex flex-col max-h-[800px] flex-wrap content-center ${rangeStyles.rangeColorSetter}`}>
-        <Card>
-          <div className="mb-6"></div>
-          <div className="px-8">
-            <div className="w-[340px] flex flex-col gap-4">
-              <ColorSample />
-              <ColorCodeOklchInput id="color-code-input" value={colorCodeInput} label="Color Code" onCommit={setColorCodeInput} />
-              <ColorCodeFormattedInput id="alt-color-code-input" value={colorCodeInput} label="Color Code" onCommit={() => { }} />
-              <ToggleSwitch label="Show P3" checked={showP3} onChange={setShowP3} />
-              <ToggleSwitch label="Show Rec2020" checked={showRec2020} onChange={setShowRec2020} />
+      <div ref={containerRef} className={`flex flex-col lg:flex-row gap-4 justify-center ${rangeStyles.rangeColorSetter}`}>
+        <div className="flex flex-col gap-4">
+          <Card>
+            <div className="mb-6"></div>
+            <div className="px-8">
+              <div className="w-[340px] flex flex-col gap-4">
+                <ColorSample />
+                <ColorCodeOklchInput id="color-code-input" value={colorCodeInput} label="Color Code" onCommit={setColorCodeInput} />
+                <ColorCodeFormattedInput id="alt-color-code-input" value={colorCodeInput} label="Color Code" onCommit={() => { }} />
+                <ToggleSwitch label="Show P3" checked={showP3} onChange={setShowP3} />
+                <ToggleSwitch label="Show Rec2020" checked={showRec2020} onChange={setShowRec2020} />
+              </div>
             </div>
-          </div>
-          <div className="mb-6"></div>
-        </Card>
-        <Card>
-          <div className="mx-8 flex flex-col gap-4 my-6">
+            <div className="mb-6"></div>
+          </Card>
+          <Card>
+            <div className="mx-8 flex flex-col gap-4 my-6">
+              <div className="w-full max-w-[340px] flex justify-between items-center">
+                <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
+                <NumericInput
+                  value={String(round2(value.a))}
+                  pattern={/^[0-9]*\.?[0-9]*$/}
+                  spin
+                  onSpin={(action, slow) => {
+                    const step = slow ? 0.01 : 0.1;
+                    const current = Number(value.a) || 0;
+                    const next =
+                      action === 'increase'
+                        ? Math.min(current + step, 1)
+                        : Math.max(current - step, 0);
+                    setComponents({ a: next });
+                  }}
+                  onChange={(val) => setComponents({ a: parseFloat(val) })}
+                />
+              </div>
+              <AlphaRange />
+            </div>
+          </Card>
+        </div>
+        <div className="flex flex-col gap-4">
+          <Card>
+            <div className="mb-6"></div>
             <div className="w-full max-w-[340px] flex justify-between items-center">
-              <span className={`text-xl font-mono ${font.className}`}>Alpha</span>
+              <span className={`text-xl font-mono ${font.className}`}>Lightness</span>
               <NumericInput
-                value={String(round2(value.a))}
-                pattern={/^[0-9]*\.?[0-9]*$/}
+                value={String(round3(value.l))}
+                pattern={/^\d*\.?\d*$/}
                 spin
                 onSpin={(action, slow) => {
-                  const step = slow ? 0.01 : 0.1;
-                  const current = Number(value.a) || 0;
+                  const step = slow ? 0.001 : 0.05;
+                  const current = Number(value.l) || 0;
                   const next =
                     action === 'increase'
-                      ? Math.min(current + step, 1)
+                      ? Math.min(current + step, L_MAX)
                       : Math.max(current - step, 0);
-                  setComponents({ a: next });
+                  setComponents({ l: next });
                 }}
-                onChange={(val) => setComponents({ a: parseFloat(val) })}
+                onChange={(val) => setComponents({ l: parseFloat(val) })}
               />
             </div>
-            <AlphaRange />
-          </div>
-        </Card>
-        <Card>
-          <div className="mb-6"></div>
-          <div className="w-full max-w-[340px] flex justify-between items-center">
-            <span className={`text-xl font-mono ${font.className}`}>Lightness</span>
-            <NumericInput
-              value={String(round3(value.l))}
-              pattern={/^\d*\.?\d*$/}
-              spin
-              onSpin={(action, slow) => {
-                const step = slow ? 0.001 : 0.05;
-                const current = Number(value.l) || 0;
-                const next =
-                  action === 'increase'
-                    ? Math.min(current + step, L_MAX)
-                    : Math.max(current - step, 0);
-                setComponents({ l: next });
-              }}
-              onChange={(val) => setComponents({ l: parseFloat(val) })}
-            />
-          </div>
-          <Chart componentType="h" />
-          <Range componentType="l" />
-          <div className="mb-6"></div>
-        </Card>
-        <Card>
-          <Model className="w-[404px] h-[344px]" />
-          <div className="absolute top-8 left-8">
-            <span className={`text-xl font-mono pointer-events-none ${font.className}`}>3D</span>
-          </div>
-        </Card>
-        <Card>
-          <div className="mb-6"></div>
-          <div className="w-full max-w-[340px] flex justify-between items-center">
-            <span className={`text-xl font-mono ${font.className}`}>Chroma</span>
-            <NumericInput
-              value={String(round3(value.c))}
-              pattern={/^\d*\.?\d*$/}
-              spin
-              onSpin={(action, slow) => {
-                const step = slow ? 0.001 : 0.01;
-                const current = Number(value.c) || 0;
-                const next =
-                  action === 'increase'
-                    ? Math.min(current + step, getMaxC(showRec2020))
-                    : Math.max(current - step, 0);
-                setComponents({ c: next });
-              }}
-              onChange={(val) => setComponents({ c: parseFloat(val) })}
-            />
-          </div>
-          <Chart componentType="l" />
-          <Range componentType="c" />
-          <div className="mb-6"></div>
-        </Card>
-        <Card>
-          <div className="mb-6"></div>
-          <div className="w-full max-w-[340px] flex justify-between items-center">
-            <span className={`text-xl font-mono ${font.className}`}>Hue</span>
-            <NumericInput
-              value={String(round2(value.h))}
-              pattern={/^\d*\.?\d*$/}
-              spin
-              onSpin={(action, slow) => {
-                const step = slow ? 1 : 10;
-                const current = value.h;
-                // Smooth wrap around hue.
-                const constrain = (v: number) => {
-                  if (v === H_MAX) return v;
-                  if (v < 0) {
-                    const neg = v % H_MAX;
-                    return H_MAX + neg;
-                  }
-                  return v % H_MAX;
-                };
-                const next =
-                  action === 'increase'
-                    ? constrain(current + step)
-                    : constrain(current - step);
-                setComponents({ h: next });
-              }}
-              onChange={(val) => setComponents({ h: parseFloat(val) })}
-            />
-          </div>
-          <Chart componentType="c" />
-          <Range componentType="h" />
-          <div className="mb-6"></div>
-        </Card>
+            <Chart componentType="h" />
+            <Range componentType="l" />
+            <div className="mb-6"></div>
+          </Card>
+          <Card>
+            <Model className="w-[404px] h-[344px]" />
+            <div className="absolute top-8 left-8">
+              <span className={`text-xl font-mono pointer-events-none ${font.className}`}>3D</span>
+            </div>
+          </Card>
+        </div>
+        <div className="flex flex-col gap-4">
+          <Card>
+            <div className="mb-6"></div>
+            <div className="w-full max-w-[340px] flex justify-between items-center">
+              <span className={`text-xl font-mono ${font.className}`}>Chroma</span>
+              <NumericInput
+                value={String(round3(value.c))}
+                pattern={/^\d*\.?\d*$/}
+                spin
+                onSpin={(action, slow) => {
+                  const step = slow ? 0.001 : 0.01;
+                  const current = Number(value.c) || 0;
+                  const next =
+                    action === 'increase'
+                      ? Math.min(current + step, getMaxC(showRec2020))
+                      : Math.max(current - step, 0);
+                  setComponents({ c: next });
+                }}
+                onChange={(val) => setComponents({ c: parseFloat(val) })}
+              />
+            </div>
+            <Chart componentType="l" />
+            <Range componentType="c" />
+            <div className="mb-6"></div>
+          </Card>
+          <Card>
+            <div className="mb-6"></div>
+            <div className="w-full max-w-[340px] flex justify-between items-center">
+              <span className={`text-xl font-mono ${font.className}`}>Hue</span>
+              <NumericInput
+                value={String(round2(value.h))}
+                pattern={/^\d*\.?\d*$/}
+                spin
+                onSpin={(action, slow) => {
+                  const step = slow ? 1 : 10;
+                  const current = value.h;
+                  // Smooth wrap around hue.
+                  const constrain = (v: number) => {
+                    if (v === H_MAX) return v;
+                    if (v < 0) {
+                      const neg = v % H_MAX;
+                      return H_MAX + neg;
+                    }
+                    return v % H_MAX;
+                  };
+                  const next =
+                    action === 'increase'
+                      ? constrain(current + step)
+                      : constrain(current - step);
+                  setComponents({ h: next });
+                }}
+                onChange={(val) => setComponents({ h: parseFloat(val) })}
+              />
+            </div>
+            <Chart componentType="c" />
+            <Range componentType="h" />
+            <div className="mb-6"></div>
+          </Card>
+        </div>
       </div>
     </>
   );
