@@ -29,8 +29,10 @@ export default function Home() {
     <>
       <button onClick={handleWork}>Work</button>
       <RenderContextProvider>
-      <OklchPicker />
-      <OklchPicker />
+      <OklchPicker defaultColorCode="oklch(0.673 0.18 163)" />
+      <OklchPicker defaultColorCode="oklch(0.533 0.10 233)" />
+      <OklchPicker defaultColorCode="oklch(0.533 0.10 233)" />
+        <OklchPicker />
       </RenderContextProvider>
 
       <ColorChoice

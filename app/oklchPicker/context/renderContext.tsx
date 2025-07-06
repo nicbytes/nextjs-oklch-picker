@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { PaintData, PaintedData } from "../worker";
 import { rgb, parse } from "@/lib/colors";
 import { getCleanCtx } from "../canvas";
@@ -14,28 +14,48 @@ interface StartWork<TaskData extends object, ResultData extends object> {
     onFinal: () => void
   ): void
 }
-  
+
 const TOTAL_WORKERS = navigator.hardwareConcurrency;
 
 interface RenderContextType {
-  startWorkForComponent: (canvas: HTMLCanvasElement, type: "c" | "h" | "l", value: number, chartsToChange: number, showP3: boolean, showRec2020: boolean, supportValue: SupportValue) => void;
+  startWorkForComponent: (pickerId: string, canvas: HTMLCanvasElement, type: "c" | "h" | "l", value: number, chartsToChange: number, showP3: boolean, showRec2020: boolean, supportValue: SupportValue) => void;
+  onWorkersReady: (callback: () => void) => void;
 }
 
 export const RenderContext = createContext<RenderContextType | undefined>(undefined);
 
 export function RenderContextProvider({ children }: { children: React.ReactNode }) {
   const workStarterRef = useRef<StartWork<PaintData, PaintedData>>(null);
-  
+  const [startWorkReady, setStartWorkReady] = useState(false);
+  const onReadyCallbacks = useRef<(() => void)[]>([]);
+
   useEffect(() => {
+    console.log("worker initialisation");
     const [startWork, terminateWorkers] = prepareWorkers();
     workStarterRef.current = startWork;
+    setStartWorkReady(true);
+    console.log("worker initialisation done");
     return () => {
+      setStartWorkReady(false);
       terminateWorkers();
     };
   }, []);
 
-  
+  useEffect(() => {
+    if (!startWorkReady) return;
+    onReadyCallbacks.current.forEach(callback => {
+      console.log("run onReadyCallbacks");
+      callback();
+    });
+    onReadyCallbacks.current.forEach(callback => {
+      console.log("run onReadyCallbacks");
+      callback();
+    });
+  }, [startWorkReady]);
+
+
   const startWorkForComponent = useCallback((
+    pickerId: string,
     canvas: HTMLCanvasElement,
     type: 'c' | 'h' | 'l',
     value: number,
@@ -50,13 +70,16 @@ export function RenderContextProvider({ children }: { children: React.ReactNode 
     }
     const startWork = workStarterRef.current;
 
+    const workKey = `${pickerId}-${type}`;
+
     let [cssP3, cssRec2020] = getBorders()
     let borderP3 = rgb(parse(cssP3)!)
     let borderRec2020 = rgb(parse(cssRec2020)!)
-  
+
     let parts: [ImageData, number][] = []
+    console.log("hit");
     startWork(
-      type,
+      workKey, 
       chartsToChange,
       messages =>
         messages.map((_, i) => {
@@ -97,8 +120,16 @@ export function RenderContextProvider({ children }: { children: React.ReactNode 
     )
   }, []);
 
+  const onWorkersReady = useCallback((callback: () => void) => {
+    onReadyCallbacks.current.push(callback);
+    if (startWorkReady) {
+      console.log("hit4");
+      callback();
+    }
+  }, [startWorkReady]);
+
   return (
-    <RenderContext value={{ startWorkForComponent }}>
+    <RenderContext value={{ startWorkForComponent, onWorkersReady }}>
       {children}
     </RenderContext>
   );
@@ -114,7 +145,7 @@ export function useRenderContext(): RenderContextType {
 
 
 function anyValue<V>(map: Map<string, V>): undefined | V {
-return map.values().next().value
+  return map.values().next().value
 }
 
 export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void] {
@@ -142,9 +173,10 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
     onResult,
     onFinal
   ) => {
+    console.log("startWork", { type, parallelTasks, prepare, onResult, onFinal });
     if (busy.has(type)) {
-    lastPending.set(type, [type, parallelTasks, prepare, onResult, onFinal])
-    return
+      lastPending.set(type, [type, parallelTasks, prepare, onResult, onFinal])
+      return
     }
 
     let started = Math.floor(TOTAL_WORKERS / parallelTasks)
@@ -152,8 +184,8 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
     if (started > available.length) started = available.length
 
     if (started === 0) {
-    lastPending.set(type, [type, parallelTasks, prepare, onResult, onFinal])
-    return
+      lastPending.set(type, [type, parallelTasks, prepare, onResult, onFinal])
+      return
     }
 
     busy.add(type)
@@ -162,18 +194,18 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
     let messages = prepare(Array(workers.length).fill(undefined) as undefined[])
 
     for (let [i, worker] of workers.entries()) {
-    worker.onmessage = (e: MessageEvent<PaintedData>) => {
-      onResult(e.data)
-      available.push(worker)
+      worker.onmessage = (e: MessageEvent<PaintedData>) => {
+        onResult(e.data)
+        available.push(worker)
 
-      finished += 1
-      if (finished === started) {
-      busy.delete(type)
-      startPending(lastPending.get(type) ?? anyValue(lastPending))
-      onFinal()
+        finished += 1
+        if (finished === started) {
+          busy.delete(type)
+          startPending(lastPending.get(type) ?? anyValue(lastPending))
+          onFinal()
+        }
       }
-    }
-    worker.postMessage(messages[i])
+      worker.postMessage(messages[i])
     }
   }
 
@@ -182,6 +214,7 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
       worker.terminate()
     }
   };
+
 
   return [startWork, terminateWorkers]
 }

@@ -13,6 +13,7 @@ import {
 import { formatHex8 } from 'culori/fn'
 import { C_RANDOM, COLOR_FN, L_MAX_COLOR } from "@/lib/config";
 import { LchValue, OutputFormats, SupportValue } from "../type";
+import { useRenderContext } from "./renderContext";
 
 export interface OklchContextType {
   /**
@@ -55,10 +56,11 @@ export interface OklchContextType {
   showRec2020: boolean;
   setShowRec2020: (showRec2020: boolean) => void;
   supportValue: SupportValue;
+  pickerId: string;
 
   addPaintCallbacks: (name: string, callbacks: LchCallbacks) => void;
 
-  paint: () => void;
+  paint: (value: LchValue) => void;
 }
 
 export const OklchContext = createContext<OklchContextType | undefined>(undefined);
@@ -78,6 +80,10 @@ export function useOklchContext(): OklchContextType {
 
 export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ children, defaultColorCode }) => {
 
+  const pickerId = useMemo(() => {
+    return Math.random().toString(36).slice(2, 9);
+  }, []);
+
   const processedDefaultValue = useMemo(() => {
     const colorValue = codeToLchValue(defaultColorCode);
     if (!colorValue) {
@@ -96,6 +102,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   let [supportValue, setSupportValue] = useState<SupportValue>({ p3: false, rec2020: false });
   const paintCallbacks = useRef<Map<string, LchCallbacks>>(new Map());
   const lastValue = useRef<LchValue>(value);
+  const { onWorkersReady } = useRenderContext();
 
 
   const setValue = useCallback((nextOrUpdater: LchValue | ((prev: LchValue) => LchValue)) => {
@@ -151,45 +158,130 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   );
 
   // Force run all listeners.
-  const paint = useCallback(() => {
-    for (let [_name, callbacks] of paintCallbacks.current.entries()) {
-      console.log("(paint) runListeners", callbacks);
-      if (callbacks.l) {
-        callbacks.l(value.l, 3)
-      }
-      if (callbacks.c) {
-        callbacks.c(value.c, 3)
-      }
-      if (callbacks.h) {
-        callbacks.h(value.h, 3)
-      }
-      if (callbacks.alpha) {
-        callbacks.alpha(value.a, 0)
-      }
+  const paint = useCallback((value: LchValue, selectedName?: string, selectedCallback?: 'l' | 'c' | 'h' | 'alpha' | 'lc' | 'ch' | 'lh' | 'lch') => {
+    console.log("(paint) runListeners", paintCallbacks.current, value);
+    if (selectedName === undefined && selectedCallback === undefined) {
+      // Run all listenters
+      for (let [_name, callbacks] of paintCallbacks.current.entries()) {
+        console.log("(paint) runListeners", callbacks);
+        if (callbacks.l) {
+          callbacks.l(value.l, 3)
+        }
+        if (callbacks.c) {
+          callbacks.c(value.c, 3)
+        }
+        if (callbacks.h) {
+          callbacks.h(value.h, 3)
+        }
+        if (callbacks.alpha) {
+          callbacks.alpha(value.a, 0)
+        }
 
-      if (callbacks.lc) {
-        callbacks.lc(value)
+        if (callbacks.lc) {
+          callbacks.lc(value)
+        }
+        if (callbacks.ch) {
+          callbacks.ch(value)
+        }
+        if (callbacks.lh) {
+          callbacks.lh(value)
+        }
+        if (callbacks.lch) {
+          callbacks.lch(value)
+        }
       }
-      if (callbacks.ch) {
-        callbacks.ch(value)
-      }
-      if (callbacks.lh) {
-        callbacks.lh(value)
-      }
-      if (callbacks.lch) {
-        callbacks.lch(value)
-      }
+      return;
     }
-  }, [paintCallbacks, value]);
 
-  useEffect(() => {
-    setColorCodeInput(defaultColorCode);
-  }, []);
+    // make sure both are defined
+    if (selectedName === undefined || selectedCallback === undefined) {
+      console.error("paint: selectedName and selectedCallback must be defined when either are used");
+      return;
+    }
 
-  // Repaint when showP3 or showRec2020 changes
+    const callbackSet = paintCallbacks.current.get(selectedName);
+    if (!callbackSet) {
+      console.error(`paint: selectedName must be a valid name, got ${selectedName}, available names: ${paintCallbacks.current.keys()}`);
+      return;
+    }
+    switch (selectedCallback) {
+      case 'l': {
+        if (callbackSet.l) {
+          callbackSet.l(value.l, 3)
+        }
+      } break;
+      case 'c': {
+        if (callbackSet.c) {
+          callbackSet.c(value.c, 3)
+        }
+      } break;
+      case 'h': {
+        if (callbackSet.h) {
+          callbackSet.h(value.h, 3)
+        }
+      } break;
+      case 'alpha': {
+        if (callbackSet.alpha) {
+          callbackSet.alpha(value.a, 0)
+        }
+      } break;
+      case 'lc': {
+        if (callbackSet.lc) {
+          callbackSet.lc(value)
+        }
+      } break;
+      case 'ch': {
+        if (callbackSet.ch) {
+          callbackSet.ch(value)
+        }
+      } break;
+      case 'lh': {
+        if (callbackSet.lh) {
+          callbackSet.lh(value)
+        }
+      } break;
+      case 'lch': {
+        if (callbackSet.lch) {
+          callbackSet.lch(value)
+        }
+      } break;
+    }
+  }, [paintCallbacks.current?.keys()]);
+
+  // useEffect(() => {
+  //   setColorCodeInput(defaultColorCode);
+  // }, []);
+
+  // // Repaint when showP3 or showRec2020 changes
+  // useEffect(() => {
+  //   paint();
+  // }, [showP3, showRec2020]);
+
+  const initialDraw = useRef(false);
   useEffect(() => {
-    paint();
-  }, [showP3, showRec2020]);
+    if (!paintCallbacks.current) {
+      return;
+    }
+    if (initialDraw.current) {
+      return;
+    }
+
+    console.log("available callbacks", paintCallbacks.current.keys());
+
+    if (mapHasAllKeys(paintCallbacks.current, ['chart-for-l', 'chart-for-c', 'chart-for-h'])) {
+      initialDraw.current = true;
+      // paint(value);
+      console.log("drawing initial charts")
+      onWorkersReady(() => {
+        console.log("drawing initial charts: h")
+        // paintCallbacks.current.get('chart-for-h')!.h!(value.h, 1); // Draw Lightness chart
+        paint(value);
+      });
+
+    }
+
+  }, [paintCallbacks.current?.size, value]);
+
 
 
   const setColorCodeInput = useCallback(
@@ -200,7 +292,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
         setStateColorCodeInput(code);
       }
     },
-    [colorCodeInput, outputFormat, setValue]
+    [colorCodeInput, outputFormat]
   );
 
   const callbackSetSupportValue = useCallback(() => {
@@ -225,10 +317,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
 
   const addPaintCallbacks = (name: string, callbacks: LchCallbacks) => paintCallbacks.current.set(name, callbacks);
 
-  useEffect(() => {
-    console.log("paintCallbacks", paintCallbacks);
-  }, [paintCallbacks]);
-
   const val = {
     colorCodeInput,
     setColorCodeInput,
@@ -244,6 +332,7 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     setShowP3,
     showRec2020,
     setShowRec2020,
+    pickerId,
 
     addPaintCallbacks,
     paint,
@@ -257,7 +346,19 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   );
 }
 
-
+/**
+ * Returns true only if *every* key is present in the map.
+ * Works with Map<string, T> or any Map<K, V>.
+ */
+function mapHasAllKeys<K, V>(
+  map: Map<K, V>,
+  keys: Iterable<K>,
+): boolean {
+  for (const key of keys) {
+    if (!map.has(key)) return false;
+  }
+  return true;
+}
 
 function round2(value: number): number {
   return parseFloat(value.toFixed(2))

@@ -26,7 +26,7 @@ function round4(value: number): number {
 }
 
 export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h' }) {
-  const { setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks } = useOklchContext();
+  const { pickerId, setComponents, supportValue, showCharts, showP3, showRec2020, addPaintCallbacks } = useOklchContext();
   const { startWorkForComponent } = useRenderContext();
 
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -56,6 +56,7 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     console.log("OklchPickerComponent useEffect: canvases", chartRef.current);
 
     initCanvasSize(chartRef.current);
+    console.log("Chart: Initialising charts done");
 
     // Bind the chart lines to the current values
     xAxisDivRef.current!.style.setProperty('--chart-line-position', `var(--chart-${xComponent.toLowerCase()})`);
@@ -88,8 +89,8 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
   useEffect(() => {
     addPaintCallbacks(`chart-for-${componentType}`, {
       [componentType]: (c: number, chartsToChange: number) => {
-        if (!showCharts) return
-        startWorkForComponent(chartRef.current!, componentType, c, chartsToChange, showP3, showRec2020, supportValue);
+        if (!showCharts || !chartRef.current) return
+        startWorkForComponent(pickerId, chartRef.current, componentType, c, chartsToChange, showP3, showRec2020, supportValue);
       },
     });
 
@@ -104,7 +105,7 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
         containingDivRef.current!.style.setProperty('--chart-l', `${round2((100 * l) / L_MAX)}%`);
       }
     });
-  }, [componentType, showCharts, showP3, showRec2020, supportValue]);
+  }, [pickerId, componentType, showCharts, showP3, showRec2020, supportValue]);
 
   const xPositionVariable = `--chart-${xComponent.toLowerCase()}`;
   const yPositionVariable = `--chart-${yComponent.toLowerCase()}`;
