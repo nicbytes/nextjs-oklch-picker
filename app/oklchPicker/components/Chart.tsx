@@ -42,17 +42,12 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
 
 
   useEffect(() => {
-    console.log("OklchPickerComponent useEffect: before check");
     if (!chartRef.current) {
-      console.log("OklchPickerComponent useEffect: not ready");
       return;
     }
 
-    console.log("OklchPickerComponent useEffect: Initialising charts");
-    console.log("OklchPickerComponent useEffect: canvases", chartRef.current);
 
     initCanvasSize(chartRef.current);
-    console.log("Chart: Initialising charts done");
 
     // Bind the chart lines to the current values
     xAxisDivRef.current!.style.setProperty('--chart-line-position', `var(--chart-${xComponent.toLowerCase()})`);
@@ -62,14 +57,12 @@ export default function Chart({ componentType }: { componentType: 'l' | 'c' | 'h
     function initEvents(chart: HTMLCanvasElement): void {
       function onSelect(e: MouseEvent): void {
         e.preventDefault()
-        console.log("onSelect", e.clientX, e.clientY);
         setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 
       function onMouseUp(e: MouseEvent): void {
         document.removeEventListener('mousemove', onSelect)
         document.removeEventListener('mouseup', onMouseUp)
-        console.log("onMouseUp", e.clientX, e.clientY);
         setComponentsFromSpace(chart, e.clientX, e.clientY, componentType, setComponents, showRec2020)
       }
 

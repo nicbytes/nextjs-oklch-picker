@@ -105,7 +105,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
 
 
   const setValue = useCallback((nextOrUpdater: LchValue | ((prev: LchValue) => LchValue)) => {
-    console.log("(useCallback) setValue", nextOrUpdater);
     const prev = lastValue.current;
     // 1. Resolve the next state
     const next =
@@ -133,7 +132,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
     finalNext.h = round4(finalNext.h);
     finalNext.l = round6(finalNext.l);
 
-    console.log("setValue", finalNext);
     if (finalNext.l !== prev.l || finalNext.c !== prev.c || finalNext.h !== prev.h || finalNext.a !== prev.a) {
 
       runListeners(paintCallbacks.current, prev, finalNext);
@@ -147,7 +145,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
   const setComponents = useCallback(
     (parts: Partial<LchValue>) => {
 
-      console.log("setComponents", parts);
       setValue(prev => ({
         ...prev,
         ...preciseRoundValue(parts)
@@ -158,11 +155,9 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
 
   // Force run all listeners.
   const paint = useCallback((value: LchValue, selectedName?: string, selectedCallback?: 'l' | 'c' | 'h' | 'alpha' | 'lc' | 'ch' | 'lh' | 'lch') => {
-    console.log("(paint) runListeners", paintCallbacks.current, value);
     if (selectedName === undefined && selectedCallback === undefined) {
       // Run all listenters
       for (const callbacks of paintCallbacks.current.values()) {
-        console.log("(paint) runListeners", callbacks);
         if (callbacks.l) {
           callbacks.l(value.l, 3)
         }
@@ -266,7 +261,6 @@ export const OklchContextProvider: React.FC<OklchContextProviderProps> = ({ chil
       return;
     }
 
-    console.log("available callbacks", paintCallbacks.current.keys());
 
     if (mapHasAllKeys(paintCallbacks.current, ['chart-for-l', 'chart-for-c', 'chart-for-h'])) {
       initialDraw.current = true;
@@ -508,41 +502,31 @@ function runListeners(map: Map<string, LchCallbacks>, prev: PrevCurrentValue, ne
     chartsToChange = 1
   }
 
-  console.log("(fn call) runListeners", map, prev, next, chartsToChange);
 
   for (const [_name, callbacks] of map.entries()) {
-    console.log("(inside loop) runListeners", _name, callbacks);
     if (callbacks.l && lChanged) {
-      console.log("callback l", next.l, chartsToChange);
       callbacks.l(next.l, chartsToChange)
     }
     if (callbacks.c && cChanged) {
-      console.log("callback c", next.c, chartsToChange);
       callbacks.c(next.c, chartsToChange)
     }
     if (callbacks.h && hChanged) {
-      console.log("callback h", next.h, chartsToChange);
       callbacks.h(next.h, chartsToChange)
     }
     if (callbacks.alpha && aChanged) {
-      console.log("callback alpha", next.a, chartsToChange);
       callbacks.alpha(next.a, 0)
     }
 
     if (callbacks.lc && (lChanged || cChanged)) {
-      console.log("callback lc", next);
       callbacks.lc(next)
     }
     if (callbacks.ch && (cChanged || hChanged)) {
-      console.log("callback ch", next);
       callbacks.ch(next)
     }
     if (callbacks.lh && (lChanged || hChanged)) {
-      console.log("callback lh", next);
       callbacks.lh(next)
     }
     if (callbacks.lch && (lChanged || cChanged || hChanged || aChanged)) {
-      console.log("callback lch", next);
       callbacks.lch(next)
     }
   }

@@ -4,7 +4,6 @@ export function getCleanCtx(
   canvas: HTMLCanvasElement,
   support: SupportValue
 ): CanvasRenderingContext2D {
-  console.log("getCleanCtx canvas", canvas, "support", support)
   const ctx = canvas.getContext('2d', {
     colorSpace: support.p3 ? 'display-p3' : 'srgb'
   })!

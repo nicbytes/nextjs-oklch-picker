@@ -30,11 +30,9 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
   const onReadyCallbacks = useRef<(() => void)[]>([]);
 
   useEffect(() => {
-    console.log("worker initialisation");
     const [startWork, terminateWorkers] = prepareWorkers();
     workStarterRef.current = startWork;
     setStartWorkReady(true);
-    console.log("worker initialisation done");
     return () => {
       setStartWorkReady(false);
       terminateWorkers();
@@ -44,11 +42,9 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
   useEffect(() => {
     if (!startWorkReady) return;
     onReadyCallbacks.current.forEach(callback => {
-      console.log("run onReadyCallbacks");
       callback();
     });
     onReadyCallbacks.current.forEach(callback => {
-      console.log("run onReadyCallbacks");
       callback();
     });
   }, [startWorkReady]);
@@ -64,7 +60,6 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
     showRec2020: boolean,
     supportValue: SupportValue,
   ) => {
-    console.log("startWorkForComponent", canvas, type, value, chartsToChange, showP3, showRec2020, supportValue);
     if (!workStarterRef.current) {
       return;
     }
@@ -77,7 +72,6 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
     const borderRec2020 = rgb(parse(cssRec2020)!)
 
     const parts: [ImageData, number][] = []
-    console.log("hit");
     startWork(
       workKey, 
       chartsToChange,
@@ -123,7 +117,6 @@ export function ColorPickerRenderContextProvider({ children }: { children: React
   const onWorkersReady = useCallback((callback: () => void) => {
     onReadyCallbacks.current.push(callback);
     if (startWorkReady) {
-      console.log("hit4");
       callback();
     }
   }, [startWorkReady]);
@@ -173,7 +166,6 @@ export function prepareWorkers(): [StartWork<PaintData, PaintedData>, () => void
     onResult,
     onFinal
   ) => {
-    console.log("startWork", { type, parallelTasks, prepare, onResult, onFinal });
     if (busy.has(type)) {
       lastPending.set(type, [type, parallelTasks, prepare, onResult, onFinal])
       return
