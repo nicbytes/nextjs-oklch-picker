@@ -7,7 +7,7 @@ import {
   isHexNotation,
   inP3,
   inRGB
-} from '@/lib/colors';   // path relative to your project
+} from './oklchPicker/colors';   // path relative to your project
 import type { Color } from 'culori/fn';
 
 // output-format enum identical to stores/formats.ts, but local
